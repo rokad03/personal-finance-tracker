@@ -25,7 +25,6 @@ export const loginSlice = createSlice({
           state.loading=true;
         },
         loginSuccess:(state,action)=>{
-        
             state.users=action.payload;
             state.loading=false;
         },

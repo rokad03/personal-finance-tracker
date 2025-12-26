@@ -10,9 +10,9 @@ import Transaction from './components/Pages/Transaction';
 import ProtectedRoute from './components/ProtectedRoute';
 import { useDispatch } from 'react-redux';
 import { restoreSession } from './components/slice/loginSlice';
-
 export default function App() {
   const dispatch=useDispatch();
+
   useEffect(()=>{dispatch(restoreSession())},[dispatch])
   return (
     <>

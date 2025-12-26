@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {v4 as uuid} from "uuid";
 import {
   Box,
@@ -12,21 +12,29 @@ import {
 import { useDispatch } from "react-redux";
 import { addTransaction, Type } from "../slice/transactionSlice";
 import TransactionList from "./TransactionList";
+import { useNavigate } from "react-router-dom";
 type Values={
   id:string,
   amount:string,
   type:Type,
   date:string
 }
+
 export default function Transaction() {
   const dispatch=useDispatch();
+  const navigate=useNavigate();
   const [values, setValues] = useState<Values>({
     id:uuid(),
     amount: "",
     type: "shopping" as Type  ,
     date: "",
   });
-
+  const user = sessionStorage.getItem("session_user")
+    useEffect(() => {
+      if (!user) {
+        navigate("/login", { replace: true });
+      }
+    }, [user,navigate]);
   function handleTransaction(){
     dispatch(addTransaction({
       id:uuid(),

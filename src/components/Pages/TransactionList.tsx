@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useAppDispatch, useAppSelector } from '../hooks'
 
 import {
-    Button,
+  Button,
   Paper,
   Table,
   TableBody,
@@ -17,7 +17,6 @@ import { deleteTransaction } from '../slice/transactionSlice';
 
 export type Transaction = {
   id: string;
-  type: "income" | "expense";
   amount: number;
   category: string;
   date: string;
