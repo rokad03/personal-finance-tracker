@@ -1,13 +1,27 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import styles from './Navbar.module.css'
+import { Box,AppBar,Toolbar,Typography,Button } from '@mui/material'
+import { useDispatch } from 'react-redux'
+import { logout } from './slice/loginSlice'
+
 function Navbar() {
+  const dispatch=useDispatch();
   return (
-    <nav className={styles.navbar}>
-      <Link to="/dashboard">Dashboard</Link> |{' '}
-      <Link to="/transactions">Transactions</Link> |{' '}
-      <Link to="/recurring-transactions">Reports</Link>
-    </nav>
+    <>
+    <Box sx={{ flexGrow: 1 }}>
+      <AppBar position="static">
+        <Toolbar>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+           <Link to="/dashboard">Dashboard</Link> {' '}
+           <Link to="/transactions">Transactions</Link> {' '}
+           <Link to="/recurring-transactions">Reports</Link>
+          </Typography>
+          <Button color="inherit" onClick={()=>dispatch(logout())}>Logout</Button>
+        </Toolbar>
+      </AppBar>
+    </Box>
+    </>
   )
 }
 
