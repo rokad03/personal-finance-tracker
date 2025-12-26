@@ -27,7 +27,7 @@ function* handleLogin(action:ReturnType<typeof loginRequest>): SagaIterator {
         }
         const authres=yield call(userAuthorisation,{username,password})
            console.log(authres);
-        const expiresAt=Date.now()+1000*60*1;
+        const expiresAt=Date.now()+1000*60*30;
         console.log(expiresAt);
         const finalUser={
             ...foundUser,

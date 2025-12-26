@@ -84,20 +84,14 @@ export default function Transaction() {
             <MenuItem value="rent">Rent</MenuItem>
             <MenuItem value="fees">Fees</MenuItem>
             <MenuItem value="sip">SIP</MenuItem>
-            
           </TextField>
-
-          
-
           <TextField
-          
             type="date"
             fullWidth
             value={values.date}
             onChange={(e) =>
               setValues({ ...values, date: e.target.value })
             }
-
           />
 
           <Button
@@ -113,6 +107,7 @@ export default function Transaction() {
       </Box>
     </Paper>
     <TransactionList></TransactionList>
+    
     </>
   );
 }
