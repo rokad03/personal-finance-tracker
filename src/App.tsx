@@ -22,7 +22,7 @@ export default function App() {
         <Route path='/login' element={<Login/>}></Route>
         <Route path="/dashboard" element={<Dashboard />} /> 
         <Route element={<MainLayout />}>
-        <Route path="/transactions" element={<Transaction />} />
+        <Route path="/transactions" element={<ProtectedRoute><Transaction /></ProtectedRoute>} />
         <Route path="/recurring-transactions" element={<Recurring />} />
         </Route>
       </Routes>

@@ -14,7 +14,6 @@ const initialState:initial = {
     loading:false,
     users:null,
     restoring:true
-   
 };  
 export const loginSlice = createSlice({
     name: 'login',

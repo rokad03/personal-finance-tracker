@@ -21,14 +21,14 @@ const saved = sessionStorage.getItem("transaction");
 const savedTotalAmount=sessionStorage.getItem("totalSavedAmount")
 const initialState: TxState = {
   list: saved?JSON.parse(saved):[],
-  totalItems: savedTotalAmount?JSON.parse(savedTotalAmount):0
+  totalItems: savedTotalAmount?JSON.parse(savedTotalAmount):{tAmount:0}
 };
 export const transactions=createSlice({
  name:"transactons",
  initialState,
  reducers:{
     addTransaction:(state,action:PayloadAction<Transaction>)=>{
-      state.list.push(action.payload);
+      state.list.unshift(action.payload);
       sessionStorage.setItem("transaction",JSON.stringify(state.list))
     },
     deleteTransaction:(state,action:PayloadAction<string>)=>{
@@ -42,9 +42,13 @@ export const transactions=createSlice({
     total:(state,action:PayloadAction<Total>)=>{
      state.totalItems=action.payload
      sessionStorage.setItem("totalSavedAmount",JSON.stringify(state.totalItems))
+    },
+    clearTransaction:(state)=>{
+     state.list=[];
+     sessionStorage.removeItem("transaction")
     }
  }
 })
-export const {addTransaction,deleteTransaction,editTransaction,total}=transactions.actions;
+export const {addTransaction,deleteTransaction,editTransaction,total,clearTransaction}=transactions.actions;
 export default transactions.reducer;
 

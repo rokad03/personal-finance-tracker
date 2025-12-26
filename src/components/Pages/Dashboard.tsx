@@ -33,7 +33,7 @@ function Dashboard() {
   }
   const u = JSON.parse(user ? user : "");
   const totalIncome=10000;
-  
+  console.log(totalItems.tAmount)
   return (
     <>
       <Navbar></Navbar>
@@ -54,7 +54,8 @@ function Dashboard() {
           <CardContent>
             <Typography variant="subtitle1">Total Expenses</Typography>
             <Typography variant="h5" color="error.main">
-              {totalItems.tAmount}
+              
+              {totalItems.tAmount?0:totalItems.tAmount}
             </Typography>
           </CardContent>
         </Card>

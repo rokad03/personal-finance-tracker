@@ -50,7 +50,7 @@ function* handleRestore(){
      console.log(u.expiresAt);
      console.log(Date.now());
     if(Date.now()>u.expiresAt){
-       handleLogout()
+       yield put(handleLogout);
         return;
     }
     if(user){
@@ -60,7 +60,7 @@ function* handleRestore(){
 }
 
 
-function handleLogout(){
+function* handleLogout(){
     sessionStorage.removeItem('session_user');
 }
 
