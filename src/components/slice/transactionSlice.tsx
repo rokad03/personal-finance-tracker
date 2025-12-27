@@ -5,6 +5,8 @@ export type Transaction = {
   type: Type;
   amount: string;
   date: string;
+  recurring: boolean;
+  count:0
 };
 export type Total={
   tAmount:number;
@@ -45,10 +47,14 @@ export const transactions=createSlice({
     },
     clearTransaction:(state)=>{
      state.list=[];
-     sessionStorage.removeItem("transaction")
-    }
+     sessionStorage.removeItem("transaction")   
+    },
+    sortTransaction:(state)=>{
+      state.list=state.list.sort((a,b)=>(Number(b.amount)-Number(a.amount)))
+      sessionStorage.setItem("totalSavedAmount",JSON.stringify(state.totalItems))
+    }   
  }
 })
-export const {addTransaction,deleteTransaction,editTransaction,total,clearTransaction}=transactions.actions;
+export const {addTransaction,deleteTransaction,editTransaction,total,clearTransaction,sortTransaction}=transactions.actions;
 export default transactions.reducer;
 

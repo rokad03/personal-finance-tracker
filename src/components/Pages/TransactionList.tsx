@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import { useAppDispatch, useAppSelector } from '../hooks'
-
+import { useAppDispatch, useAppSelector } from '../hooks'   
 import {
     Button,
-    Container,
     Paper,
     Stack,
     Table,
@@ -12,10 +10,10 @@ import {
     TableContainer,
     TableHead,
     TableRow,
-    Typography
+    Typography,
 } from "@mui/material";
 import EditTransactionDialog from './EditTransaction';
-import { clearTransaction, deleteTransaction, total } from '../slice/transactionSlice';
+import { clearTransaction, deleteTransaction, sortTransaction, total } from '../slice/transactionSlice';
 
 export type Transaction = {
     id: string;
@@ -23,10 +21,9 @@ export type Transaction = {
     type: string;
     date: string;
 };
-
-
 export default function TransactionList() {
     const transactions = useAppSelector((state) => state.transaction.list)
+    console.log(transactions);
     const dispatch = useAppDispatch();
     const [selectedId, setSelectedId] = useState<null | any>(null);
     const tAmount = transactions.reduce((sum, t) => sum + Number(t.amount), 0)
@@ -42,12 +39,15 @@ export default function TransactionList() {
             Fees,
             SIP
         }))
-    }, [tAmount, dispatch, Shopping, Rent, Fees, SIP])
+    }, [tAmount, dispatch, Shopping,Rent,Fees,SIP])
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
     const lastIndex = currentPage * itemsPerPage;
     const firstIndex = lastIndex - itemsPerPage;
+    console.log(transactions)
     const pageItems = transactions.slice(firstIndex, lastIndex)
+  
+    console.log(pageItems)
     const totalPages = Math.ceil(transactions.length / itemsPerPage)
     return (
         <>
@@ -57,7 +57,10 @@ export default function TransactionList() {
                     <Typography variant="h6" sx={{ p: 2 }}>
                         Transactions
                     </Typography>
-                    <Button onClick={()=>dispatch(clearTransaction())}>
+                    <Button onClick={()=>dispatch(sortTransaction())}>
+                        Sort By Amount
+                    </Button>
+                    <Button onClick={()=>{alert("All transactions will be deleted");dispatch(clearTransaction())}}>
                         Clear
                     </Button>
 
@@ -67,7 +70,8 @@ export default function TransactionList() {
                         <TableRow>
                             <TableCell>Date</TableCell>
                             <TableCell>Type</TableCell>
-                            <TableCell align="right">Amount (₹)</TableCell>
+                            <TableCell >Amount (₹)</TableCell>
+                            <TableCell align='right'>Recurring</TableCell>
                             <TableCell />
                         </TableRow>
                     </TableHead>
@@ -77,8 +81,11 @@ export default function TransactionList() {
                             <TableRow key={i}>
                                 <TableCell>{tx.date}</TableCell>
                                 <TableCell>{tx.type}</TableCell>
-                                <TableCell align="right">
+                                <TableCell >
                                     {tx.amount}
+                                </TableCell>
+                                <TableCell align="right">
+                                    {tx.recurring?"True":"False"}
                                 </TableCell>
                                 <TableCell align="right" >
                                     <Button onClick={() => { console.log(`test ${i}`); setSelectedId(tx) }}>
@@ -108,8 +115,8 @@ export default function TransactionList() {
                 alignItems="center"
             >
                 <Button onClick={() => setCurrentPage(prev => prev - 1)} disabled={currentPage === 1}>Prev</Button>
-                <Typography>{currentPage} of {Math.max(totalPages,1)}</Typography>
-                <Button onClick={() => setCurrentPage(next => next + 1)} disabled={currentPage === totalPages}>Next</Button>
+                <Typography>{currentPage} of {totalPages}</Typography>
+                <Button onClick={() => setCurrentPage(next => next + 1)} disabled={currentPage ===  totalPages}>Next</Button>
             </Stack>
             {
                 selectedId && (<EditTransactionDialog tx={selectedId} onClose={() => setSelectedId(null)} />)

@@ -55,7 +55,7 @@ function Dashboard() {
             <Typography variant="subtitle1">Total Expenses</Typography>
             <Typography variant="h5" color="error.main">
               
-              {totalItems.tAmount?0:totalItems.tAmount}
+              {totalItems.tAmount}
             </Typography>
           </CardContent>
         </Card>

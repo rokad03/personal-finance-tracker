@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import styles from "./Login.module.css";
 import { useNavigate } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from './hooks';
-import { loginRequest } from "./slice/loginSlice";
+import { loginError, loginRequest } from "./slice/loginSlice";
 
 function Login() {
     const dispatch = useAppDispatch();
@@ -14,6 +14,9 @@ function Login() {
         if (users) navigate("/", { replace: true })
     }, [users, navigate])
     const handleClick = () => {
+        if(username.length===0 || password.length===0){
+          dispatch(loginError("username or password not exists"))
+        }
         dispatch(loginRequest({ username, password }))
     }
     return (
