@@ -16,10 +16,13 @@ import { addTransaction, Type } from "../slice/transactionSlice";
 import TransactionList from "./TransactionList";
 import { useNavigate } from "react-router-dom";
 import Recurring from "./Recurring";
+
+
 type Values = {
   id: string,
   amount: string,
   type: Type,
+  category: string,
   date: string,
   recurring:boolean,
   count:0
@@ -31,8 +34,9 @@ export default function Transaction() {
   const [values, setValues] = useState<Values>({
     id: "",
     amount: "",
-    type: "shopping" as Type,
+    type: "Expense",
     date: "",
+    category: "shopping",
     recurring: false,
     count:0
   });
@@ -49,15 +53,17 @@ export default function Transaction() {
       type: values.type,
       date: values.date,
       recurring: values.recurring,
+      category:values.category,
       count:0
     }))
     setValues({
       id: uuid(),
       amount: "",
-      type: "shopping" as Type,
+      type: "Expense" ,
       date: "",
       recurring:false,
-      count:0
+      count:0,
+      category:"shopping" as Type
     })
   }
 
@@ -88,10 +94,19 @@ export default function Transaction() {
               }
               required
             />
-
+            <TextField
+              label="Categpry"
+              type="text"
+              fullWidth
+              value={values.category}
+              onChange={(e) =>
+                setValues({ ...values, category: e.target.value  })
+              }
+              required
+            />
             <TextField
               select
-              label="Category"
+              label="Type"
               fullWidth
               value={values.type}
               onChange={(e) =>
@@ -99,10 +114,8 @@ export default function Transaction() {
               }
               required
             >
-              <MenuItem value="shopping">Shopping</MenuItem>
-              <MenuItem value="rent">Rent</MenuItem>
-              <MenuItem value="fees">Fees</MenuItem>
-              <MenuItem value="sip">SIP</MenuItem>
+              <MenuItem value="Income">Income</MenuItem>
+              <MenuItem value="Expense">Expense</MenuItem>
             </TextField>
             <TextField
               type="date"

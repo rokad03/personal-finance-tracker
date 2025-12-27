@@ -27,19 +27,22 @@ export default function TransactionList() {
     const dispatch = useAppDispatch();
     const [selectedId, setSelectedId] = useState<null | any>(null);
     const tAmount = transactions.reduce((sum, t) => sum + Number(t.amount), 0)
-    const Shopping = transactions.filter((t) => t.type === "shopping").reduce((sum, i) => sum + Number(i.amount), 0)
-    const Rent = transactions.filter((t) => t.type === "rent").reduce((sum, i) => sum + Number(i.amount), 0)
-    const Fees = transactions.filter((t) => t.type === "fees").reduce((sum, i) => sum + Number(i.amount), 0)
-    const SIP = transactions.filter((t) => t.type === "sip").reduce((sum, i) => sum + Number(i.amount), 0)
+    const Income = transactions.filter((t) => t.type === "Income").reduce((sum, i) => sum + Number(i.amount), 0)
+    const Expense= transactions.filter((t) => t.type === "Expense").reduce((sum, i) => sum + Number(i.amount), 0)
+    const categorySorting:Record<string,number>={}
+    transactions.forEach((t)=>{
+     categorySorting[t.category]=(categorySorting[t.category]||0)+Number(t.amount);
+    })
+    const top5=Object.entries(categorySorting).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([category,amount])=>({category,amount}))
+    console.log("top5",top5);
     useEffect(() => {
         dispatch(total({
             tAmount,
-            Shopping,
-            Rent,
-            Fees,
-            SIP
+            Income,
+            Expense,
+            top5
         }))
-    }, [tAmount, dispatch, Shopping,Rent,Fees,SIP])
+    }, [tAmount, Income,Expense,dispatch,top5])
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
     const lastIndex = currentPage * itemsPerPage;
@@ -70,7 +73,9 @@ export default function TransactionList() {
                         <TableRow>
                             <TableCell>Date</TableCell>
                             <TableCell>Type</TableCell>
+                            <TableCell>Category</TableCell>
                             <TableCell >Amount (₹)</TableCell>
+                            
                             <TableCell align='right'>Recurring</TableCell>
                             <TableCell />
                         </TableRow>
@@ -81,6 +86,7 @@ export default function TransactionList() {
                             <TableRow key={i}>
                                 <TableCell>{tx.date}</TableCell>
                                 <TableCell>{tx.type}</TableCell>
+                                <TableCell>{tx.category}</TableCell>
                                 <TableCell >
                                     {tx.amount}
                                 </TableCell>

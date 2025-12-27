@@ -12,6 +12,7 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { editTransaction, Type } from "../slice/transactionSlice";
 import Recurring from "./Recurring";
+import { cachedDataVersionTag } from "node:v8";
 
 export default function EditTransactionDialog({ tx, onClose }: any) {
     const dispatch = useDispatch();
@@ -22,7 +23,8 @@ export default function EditTransactionDialog({ tx, onClose }: any) {
         amount: tx.amount,
         date: tx.date,
         recurring:tx.recurring,
-        count:tx.count
+        count:tx.count,
+        category:tx.category
     });
     console.log(values);
     const submit = () => {
@@ -32,7 +34,8 @@ export default function EditTransactionDialog({ tx, onClose }: any) {
             type:values.type,
             date:values.date,
             recurring:values.recurring,
-            count:values.count
+            count:values.count,
+            category:values.category
         }));
         onClose();
     };

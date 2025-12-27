@@ -19,8 +19,7 @@ import { useAppSelector } from "../hooks";
 
 function Dashboard() {
   const {totalItems}=useAppSelector((state)=>state.transaction)
-  const {tAmount,...totalCategory}=totalItems;
-  const CategoryArray=Object.entries(totalCategory);
+  const {tAmount,Income,Expense,top5}=totalItems;
   const navigate = useNavigate();
   const user = sessionStorage.getItem("session_user")
   useEffect(() => {
@@ -32,8 +31,7 @@ function Dashboard() {
     return (<h1>User session expires</h1>)
   }
   const u = JSON.parse(user ? user : "");
-  const totalIncome=10000;
-  console.log(totalItems.tAmount)
+  console.log(tAmount)
   return (
     <>
       <Navbar></Navbar>
@@ -43,7 +41,7 @@ function Dashboard() {
           <CardContent>
             <Typography variant="subtitle1">Total Income</Typography>
             <Typography variant="h5" color="success.main">
-             {totalIncome}
+             {Income}
             </Typography>
           </CardContent>
         </Card>
@@ -54,8 +52,7 @@ function Dashboard() {
           <CardContent>
             <Typography variant="subtitle1">Total Expenses</Typography>
             <Typography variant="h5" color="error.main">
-              
-              {totalItems.tAmount}
+              {Expense}
             </Typography>
           </CardContent>
         </Card>
@@ -66,7 +63,7 @@ function Dashboard() {
           <CardContent>
             <Typography variant="subtitle1">Current Balance</Typography>
             <Typography variant="h5" color="error.main">
-              {totalIncome-totalItems.tAmount}
+              {Income-Expense}
             </Typography>
           </CardContent>
         </Card>
@@ -87,16 +84,16 @@ function Dashboard() {
         </TableHead>
 
         <TableBody>
-          {CategoryArray.map((tx,i) => (
+          {top5.map((tx,i) => (
             <TableRow key={i}>
-              <TableCell>{tx[0]}</TableCell>
+              <TableCell>{tx.category}</TableCell>
               <TableCell align="right">
-                {tx[1]}
+                {tx.amount}
               </TableCell>
             </TableRow>
           ))}
 
-          {CategoryArray.length === 0 && (
+          {top5.length === 0 && (
             <TableRow>
               <TableCell colSpan={4} align="center">
                 No Stats found
