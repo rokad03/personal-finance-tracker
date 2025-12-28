@@ -12,7 +12,17 @@ import {
   Typography,
 } from "@mui/material";
 import { useAppDispatch, useAppSelector } from '../hooks';
-import { clearTransaction, sortTransaction } from '../slice/transactionSlice';
+import { manageCounter, sortTransaction } from '../slice/transactionSlice';
+
+const addDays=(dateStr:string,days:number)=>{
+  const [y,m,d]=dateStr.split("-").map(Number);
+  const dt=new Date(y,m-1,d+days)
+  return dt.toISOString().slice(0,10)
+}
+
+const formatedDate=(d:Date)=>
+  d.toISOString().split("T")[0];
+
 function Recurring() {
   const dispatch = useAppDispatch();
   const transactions = useAppSelector((state) => state.transaction.list);
@@ -27,16 +37,42 @@ function Recurring() {
   console.log(pageItems)
   const totalPages = Math.ceil(transactions.length / itemsPerPage)
 
-  function calculateNextTransaction(dateInput: string | Date): string {
-  const date = new Date(dateInput);
-  date.setDate(date.getDate() + 30);
-  console.log(date)
-  const lastDate=date.toISOString().split('T')[0];
-  return lastDate;
-}
+//   function calculateNextTransaction(dateInput: string | Date): string {
+//   const date = new Date(dateInput);
+//   date.setDate(date.getDate() + 30);
+//   console.log(date)
+//   const lastDate=date.toISOString().split('T')[0];
+//   return lastDate;
+// }
+ 
 
 
-  
+
+
+
+//  function compareDates(dateInput:any,count:any){
+//   const date = new Date(dateInput);
+//   date.setDate(date.getDate() + 25);
+//   const lastDate=date.toISOString().split('T')[0];
+//   console.log(lastDate);
+//   // const today=new Date().toISOString().split('T')[0];
+//   const today=new Date();
+//   today.setDate(today.getDate()+30);
+//   const comparedToday=today.toISOString().split('T')[0];
+//   console.log("Today",comparedToday);
+ 
+//      if(comparedToday>lastDate){
+//        return dispatch(manageCounter(count));
+//      }
+//      return count
+//  }
+   
+   useEffect(()=>{
+    dispatch(manageCounter())
+    
+   },[dispatch])
+
+   
   return (
     <>
       <TableContainer component={Paper} sx={{ maxWidth: 900, mx: "auto", mt: 3 }}>
@@ -70,20 +106,18 @@ function Recurring() {
                 <TableCell >
                   {tx.amount}
                 </TableCell>
-                {/* <TableCell>
-                  {compareDates(tx.date,tx.count)}
-                </TableCell> */}
+                <TableCell>
+                  {tx.count}
+                </TableCell>
                 <TableCell align="right">
-                  {tx.recurring
-                    ? calculateNextTransaction(tx.date)
-                    : "a"}
+                  {addDays(tx.date,30)}
 
                 </TableCell>
 
               </TableRow>
             ))}
 
-            {transactions.length === 0 && (
+            {recursiveTransactions.length === 0 && (
               <TableRow>
                 <TableCell colSpan={4} align="center">
                   No transactions found

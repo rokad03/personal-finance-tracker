@@ -6,7 +6,7 @@ export type Transaction = {
   amount: string;
   date: string;
   recurring: boolean;
-  count:0;
+  count:number;
   category:string
 };
 type CategoryListing={
@@ -23,6 +23,17 @@ interface TxState {
   list: Transaction[];
   totalItems:Total;
 }
+const addDays=(dateStr:string,days:number)=>{
+  const [y,m,d]=dateStr.split("-").map(Number);
+  const dt=new Date(y,m-1,d+days)
+  return dt.toISOString().slice(0,10)
+}
+
+
+const formatDate=(d:Date)=>
+  d.toISOString().split("T")[0];
+
+const todayStr=()=>new Date().toISOString().slice(0,10);
 const saved = sessionStorage.getItem("transaction");
 const savedTotalAmount=sessionStorage.getItem("totalSavedAmount")
 const initialState: TxState = {
@@ -56,9 +67,24 @@ export const transactions=createSlice({
     sortTransaction:(state)=>{
       state.list=state.list.sort((a,b)=>(Number(b.amount)-Number(a.amount)))
       sessionStorage.setItem("totalSavedAmount",JSON.stringify(state.totalItems))
-    }   
+    },
+    manageCounter:(state)=>{
+      const today=todayStr();
+      state.list.forEach((tx)=>{
+        console.log(tx.count)
+        if(!tx.recurring){
+            return;
+        }
+        const due=addDays(tx.date,30);
+        if(today>=due){
+         tx.count+=1
+         tx.date=due
+        }
+      })
+    
+    }
  }
 })
-export const {addTransaction,deleteTransaction,editTransaction,total,clearTransaction,sortTransaction}=transactions.actions;
+export const {addTransaction,deleteTransaction,editTransaction,total,clearTransaction,sortTransaction,manageCounter}=transactions.actions;
 export default transactions.reducer;
 

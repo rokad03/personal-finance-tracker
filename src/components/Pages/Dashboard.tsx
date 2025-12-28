@@ -19,7 +19,7 @@ import { useAppSelector } from "../hooks";
 
 function Dashboard() {
   const {totalItems}=useAppSelector((state)=>state.transaction)
-  const {tAmount,Income,Expense,top5}=totalItems;
+  const {tAmount,Income=0,Expense=0,top5}=totalItems;
   const navigate = useNavigate();
   const user = sessionStorage.getItem("session_user")
   useEffect(() => {
@@ -84,7 +84,14 @@ function Dashboard() {
         </TableHead>
 
         <TableBody>
-          {top5.map((tx,i) => (
+          {!top5 && (
+            <TableRow>
+              <TableCell colSpan={4} align="center">
+                No Stats found
+              </TableCell>
+            </TableRow>
+          )}
+          {top5 && top5.map((tx,i) => (
             <TableRow key={i}>
               <TableCell>{tx.category}</TableCell>
               <TableCell align="right">
@@ -93,13 +100,7 @@ function Dashboard() {
             </TableRow>
           ))}
 
-          {top5.length === 0 && (
-            <TableRow>
-              <TableCell colSpan={4} align="center">
-                No Stats found
-              </TableCell>
-            </TableRow>
-          )}
+          
         </TableBody>
       </Table>
     </TableContainer>

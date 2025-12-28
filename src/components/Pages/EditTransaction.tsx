@@ -6,13 +6,14 @@ import {
     DialogTitle,
     MenuItem,
     TextField,
-    Stack
+    Stack,
+    FormControlLabel,
+    Checkbox
 } from "@mui/material";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { editTransaction, Type } from "../slice/transactionSlice";
 import Recurring from "./Recurring";
-import { cachedDataVersionTag } from "node:v8";
 
 export default function EditTransactionDialog({ tx, onClose }: any) {
     const dispatch = useDispatch();
@@ -22,20 +23,20 @@ export default function EditTransactionDialog({ tx, onClose }: any) {
         type: tx.type,
         amount: tx.amount,
         date: tx.date,
-        recurring:tx.recurring,
-        count:tx.count,
-        category:tx.category
+        recurring: tx.recurring,
+        count: tx.count,
+        category: tx.category
     });
     console.log(values);
     const submit = () => {
         dispatch(editTransaction({
-            id:values.id,
+            id: values.id,
             amount: values.amount,
-            type:values.type,
-            date:values.date,
-            recurring:values.recurring,
-            count:values.count,
-            category:values.category
+            type: values.type,
+            date: values.date,
+            recurring: values.recurring,
+            count: values.count,
+            category: values.category
         }));
         onClose();
     };
@@ -49,29 +50,53 @@ export default function EditTransactionDialog({ tx, onClose }: any) {
                     <TextField
                         label="Amount"
                         type="number"
+                        fullWidth
                         value={values.amount}
-                        onChange={e => setValues({ ...values, amount: e.target.value })}
+                        onChange={(e) =>
+                            setValues({ ...values, amount: e.target.value })
+                        }
+                        required
+                    />
+                    <TextField
+                        label="Categpry"
+                        type="text"
+                        fullWidth
+                        value={values.category}
+                        onChange={(e) =>
+                            setValues({ ...values, category: e.target.value })
+                        }
+                        required
                     />
                     <TextField
                         select
-                        label="Category"
+                        label="Type"
                         fullWidth
                         value={values.type}
                         onChange={(e) =>
                             setValues({ ...values, type: e.target.value as Type })
                         }
+                        required
                     >
-                        <MenuItem value="shopping">Shopping</MenuItem>
-                        <MenuItem value="rent">Rent</MenuItem>
-                        <MenuItem value="fees">Fees</MenuItem>
-                        <MenuItem value="sip">SIP</MenuItem>
+                        <MenuItem value="Income">Income</MenuItem>
+                        <MenuItem value="Expense">Expense</MenuItem>
                     </TextField>
-
                     <TextField
                         type="date"
                         fullWidth
                         value={values.date}
-                        onChange={e => setValues({ ...values, date: e.target.value })}
+                        onChange={(e) =>
+                            setValues({ ...values, date: e.target.value })
+                        }
+                        required
+                    />
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                checked={values.recurring}
+                                onChange={(e) => setValues({ ...values, recurring: e.target.checked })}
+                            />
+                        }
+                        label="Mark as Recurring"
                     />
                 </Stack>
             </DialogContent>

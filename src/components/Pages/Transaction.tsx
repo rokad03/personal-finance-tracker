@@ -25,7 +25,7 @@ type Values = {
   category: string,
   date: string,
   recurring:boolean,
-  count:0
+  count:number
 }
 
 export default function Transaction() {
@@ -38,7 +38,7 @@ export default function Transaction() {
     date: "",
     category: "shopping",
     recurring: false,
-    count:0
+    count:1
   });
   const user = sessionStorage.getItem("session_user")
   useEffect(() => {
@@ -54,7 +54,7 @@ export default function Transaction() {
       date: values.date,
       recurring: values.recurring,
       category:values.category,
-      count:0
+      count:values.count
     }))
     setValues({
       id: uuid(),
@@ -62,7 +62,7 @@ export default function Transaction() {
       type: "Expense" ,
       date: "",
       recurring:false,
-      count:0,
+      count:1,
       category:"shopping" as Type
     })
   }
