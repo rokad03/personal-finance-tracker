@@ -30,8 +30,6 @@ const addDays=(dateStr:string,days:number)=>{
 }
 
 
-const formatDate=(d:Date)=>
-  d.toISOString().split("T")[0];
 
 const todayStr=()=>new Date().toISOString().slice(0,10);
 const saved = sessionStorage.getItem("transaction");

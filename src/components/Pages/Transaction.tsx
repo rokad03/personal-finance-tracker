@@ -41,6 +41,7 @@ export default function Transaction() {
     count:1
   });
   const user = sessionStorage.getItem("session_user")
+  console.log(user);
   useEffect(() => {
     if (!user) {
       navigate("/login", { replace: true });

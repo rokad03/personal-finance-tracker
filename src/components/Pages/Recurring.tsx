@@ -91,6 +91,7 @@ function Recurring() {
             <TableRow>
               <TableCell>Date</TableCell>
               <TableCell>Type</TableCell>
+              <TableCell>Category</TableCell>
               <TableCell >Amount (₹)</TableCell>
               <TableCell>No. of times Transactions occured</TableCell>
               <TableCell align='right'>Next Auto Pay</TableCell>
@@ -103,6 +104,7 @@ function Recurring() {
               <TableRow key={i}>
                 <TableCell>{tx.date}</TableCell>
                 <TableCell>{tx.type}</TableCell>
+                <TableCell>{tx.category}</TableCell>
                 <TableCell >
                   {tx.amount}
                 </TableCell>

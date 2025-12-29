@@ -6,8 +6,9 @@ import { RootState } from './store/store'
 function ProtectedRoute({children}:{children:ReactElement}) {
 
   const {users}=useSelector((state:RootState)=>state.auth);
+  console.log("USers from ProtectedRoute",users)
   if(!users) return <Navigate to="/login" replace></Navigate>
   return children;
 }
 
-export default ProtectedRoute
+export default ProtectedRoute;  

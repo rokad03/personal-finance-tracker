@@ -11,7 +11,7 @@ export interface User {
     email: string;
 }
 
-function* handleLogin(action:ReturnType<typeof loginRequest>): SagaIterator {
+export function* handleLogin(action:ReturnType<typeof loginRequest>): SagaIterator {
     
     const {username,password}=action.payload;
     try {
@@ -26,8 +26,8 @@ function* handleLogin(action:ReturnType<typeof loginRequest>): SagaIterator {
             return;
         }
         const authres=yield call(userAuthorisation,{username,password})
-           console.log(authres);
-        const expiresAt=Date.now()+1000*60*30;
+        console.log(authres);
+        const expiresAt=Date.now()+1000*30*60;
         console.log(expiresAt);
         const finalUser={
             ...foundUser,
@@ -44,19 +44,37 @@ function* handleLogin(action:ReturnType<typeof loginRequest>): SagaIterator {
 
 function* handleRestore(){
     console.log("Testing")
+    try{
     const user=sessionStorage.getItem('session_user');
     if(!user) return;
-    const u=JSON.parse(user);
-     console.log(u.expiresAt);
-     console.log(Date.now());
-    if(Date.now()>u.expiresAt){
-       yield put(handleLogout);
+    let u;
+    try{
+    u=JSON.parse(user);
+    }
+    catch{
+        sessionStorage.removeItem("session_user");
         return;
     }
-    if(user){
-     yield put(loginSuccess(JSON.parse(user)))
+     console.log(u.expiresAt);
+     console.log(Date.now());
+    if (!u?.user || !u?.expiresAt) {
+      sessionStorage.removeItem("session_user");
+      return;
     }
-     yield put({ type: "auth/restoreDone" });
+    
+    if(Date.now()>Number(u.expiresAt)){
+       sessionStorage.removeItem("session_user");
+        return;
+    }
+     if(user){
+     yield put(loginSuccess(JSON.parse(user)))
+     }
+    
+}
+catch(err){
+    sessionStorage.removeItem("session_user");
+    console.log("Error Restore Failed",err)
+}
 }
 
 

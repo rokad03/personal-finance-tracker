@@ -22,11 +22,14 @@ function Dashboard() {
   const {tAmount,Income=0,Expense=0,top5}=totalItems;
   const navigate = useNavigate();
   const user = sessionStorage.getItem("session_user")
+  console.log("Testing user before useEffect",user);
   useEffect(() => {
     if (!user) {
       navigate("/login", { replace: true });
     }
+    console.log("UseEffect is running")
   }, [user,navigate]);
+
   if(!user){
     return (<h1>User session expires</h1>)
   }
