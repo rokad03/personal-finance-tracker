@@ -20,23 +20,30 @@ export const loginSlice = createSlice({
     initialState,
     reducers:{
         loginRequest:(state,action:PayloadAction<{username:string,password:string}>)=>{
-          state.error=undefined;
           state.loading=true;
         },
         loginSuccess:(state,action)=>{
             state.users=action.payload;
             state.loading=false;
+            state.restoring=false;
         },
         loginError:(state,action)=>{
             state.loading=false;
             state.error=action.payload;
+            state.restoring=false;
         },
-        restoreSession:()=>{},
+        restoreSession:(state)=>{
+            state.restoring=true;
+        },
+        restoreFinished:(state)=>{
+            state.restoring=false;
+        },
         logout:(state)=>{
             state.users=null;
+            state.restoring=false;
         },
        
     }           
 });
-export const {loginRequest,loginSuccess,loginError,restoreSession,logout} = loginSlice.actions;
+export const {loginRequest,loginSuccess,loginError,restoreSession,logout,restoreFinished} = loginSlice.actions;
 export default loginSlice.reducer;

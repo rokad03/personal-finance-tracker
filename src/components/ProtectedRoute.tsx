@@ -5,7 +5,8 @@ import { RootState } from './store/store'
 
 function ProtectedRoute({children}:{children:ReactElement}) {
 
-  const {users}=useSelector((state:RootState)=>state.auth);
+  const {users,restoring}=useSelector((state:RootState)=>state.auth);
+  if(restoring) return <div>Loading...</div>
   console.log("USers from ProtectedRoute",users)
   if(!users) return <Navigate to="/login" replace></Navigate>
   return children;

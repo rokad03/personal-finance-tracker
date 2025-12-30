@@ -9,14 +9,21 @@ describe('authSaga - handleLogin', () => {
   const action = loginRequest({ username: 'john', password: '123' });
   const gen = handleLogin(action);
 
-  it('should step through the login process', () => {
+  test('Successfull login', () => {
   
     expect(gen.next().value).toEqual(call(fetchUsersApi));
 
     const mockUsers = { users: [{ username: 'john', password: '123', id: 1 }] };
  
-    expect(gen.next(mockUsers).value).toEqual(call(userAuthorisation, { username: 'john', password: '123' })); 
+    expect(gen.next(mockUsers).value).toEqual(call(userAuthorisation, { username: 'john', password: '123' }));
+    expect(gen.next().value).toBe("done")
     
   });
+
+  test('User not found on api',()=>{
+    expect(gen.next().value).toEqual(call(fetchUsersApi));
+    const error=new Error("User not found");
+    // expect(gen.throw(error).value).toEqual(put(loginError("User not found")))
+  })
 });
 

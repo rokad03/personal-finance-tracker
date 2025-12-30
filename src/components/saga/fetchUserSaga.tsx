@@ -1,5 +1,5 @@
 import { call, put, takeLatest } from 'redux-saga/effects';
-import { loginRequest,loginError,loginSuccess, restoreSession,logout } from '../slice/loginSlice';
+import { loginRequest,loginError,loginSuccess, restoreSession,logout, restoreFinished } from '../slice/loginSlice';
 import { type SagaIterator } from 'redux-saga';
 import { fetchUsersApi } from '../api/fetchusers';
 import { userAuthorisation } from '../api/userAuthorisation';
@@ -46,29 +46,32 @@ function* handleRestore(){
     console.log("Testing")
     try{
     const user=sessionStorage.getItem('session_user');
-    if(!user) return;
+    if(!user) {yield put(restoreFinished()); return;}
     let u;
     try{
     u=JSON.parse(user);
     }
     catch{
         sessionStorage.removeItem("session_user");
+         yield put(loginError("corrupt"));
         return;
     }
      console.log(u.expiresAt);
      console.log(Date.now());
-    if (!u?.user || !u?.expiresAt) {
+    if ( !u?.expiresAt) {
       sessionStorage.removeItem("session_user");
+       yield put(loginError("Invalid Error"));
       return;
     }
     
     if(Date.now()>Number(u.expiresAt)){
        sessionStorage.removeItem("session_user");
+       yield put(loginError("Session expired"))
         return;
     }
-     if(user){
+     
      yield put(loginSuccess(JSON.parse(user)))
-     }
+     
     
 }
 catch(err){

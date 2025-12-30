@@ -48,6 +48,7 @@ export default function Transaction() {
     }
   }, [user, navigate]);
   function handleTransaction() {
+ 
     dispatch(addTransaction({
       id: uuid(),
       amount: values.amount,
@@ -87,6 +88,7 @@ export default function Transaction() {
           <Stack spacing={2}>
             <TextField
               label="Amount"
+              data-testid="amount"
               type="number"
               fullWidth
               value={values.amount}
@@ -96,7 +98,8 @@ export default function Transaction() {
               required
             />
             <TextField
-              label="Categpry"
+              label="Category"
+              data-testid="Category"
               type="text"
               fullWidth
               value={values.category}
@@ -108,6 +111,7 @@ export default function Transaction() {
             <TextField
               select
               label="Type"
+              data-testid="Type"
               fullWidth
               value={values.type}
               onChange={(e) =>
@@ -119,6 +123,7 @@ export default function Transaction() {
               <MenuItem value="Expense">Expense</MenuItem>
             </TextField>
             <TextField
+              data-testid="date"
               type="date"
               fullWidth
               value={values.date}
@@ -135,9 +140,11 @@ export default function Transaction() {
                 />
               }
               label="Mark as Recurring"
+              data-testid="check"
               />
             <Button
               variant="contained"
+              data-testid="Btn"
               fullWidth
               size="large"
               onClick={handleTransaction}

@@ -29,8 +29,6 @@ const addDays=(dateStr:string,days:number)=>{
   return dt.toISOString().slice(0,10)
 }
 
-
-
 const todayStr=()=>new Date().toISOString().slice(0,10);
 const saved = sessionStorage.getItem("transaction");
 const savedTotalAmount=sessionStorage.getItem("totalSavedAmount")
