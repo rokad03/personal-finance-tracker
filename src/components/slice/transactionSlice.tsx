@@ -1,24 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-export type Type= "Income"|"Expense";
-export type Transaction = {
-  id: string;
-  type: Type;
-  amount: string;
-  date: string;
-  recurring: boolean;
-  count:number;
-  category:string
-};
-type CategoryListing={
-    category:string;
-    amount:number
-}
-export type Total={
-  tAmount:number;
-  Income:number;
-  Expense:number;
-  top5:CategoryListing[]
-}
+import { Total, Transaction } from "../../Types/types";
+
+
 interface TxState {
   list: Transaction[];
   totalItems:Total;

@@ -12,21 +12,12 @@ import {
   FormControlLabel
 } from "@mui/material";
 import { useDispatch } from "react-redux";
-import { addTransaction, Type } from "../slice/transactionSlice";
+import { addTransaction } from "../slice/transactionSlice";
 import TransactionList from "./TransactionList";
 import { useNavigate } from "react-router-dom";
-import Recurring from "./Recurring";
 
+import { Type, Values } from "../../Types/types"
 
-type Values = {
-  id: string,
-  amount: string,
-  type: Type,
-  category: string,
-  date: string,
-  recurring:boolean,
-  count:number
-}
 
 export default function Transaction() {
   const dispatch = useDispatch();
@@ -38,9 +29,14 @@ export default function Transaction() {
     date: "",
     category: "shopping",
     recurring: false,
-    count:1
+    count: 1
   });
   const user = sessionStorage.getItem("session_user")
+  const isValid =
+    values.amount.trim() !== "" &&
+    values.category.trim() !== "" &&
+    values.date.trim() !== "" &&
+    values.type.trim() !== "";
   console.log(user);
   useEffect(() => {
     if (!user) {
@@ -48,24 +44,24 @@ export default function Transaction() {
     }
   }, [user, navigate]);
   function handleTransaction() {
- 
+    if (!isValid) return
     dispatch(addTransaction({
       id: uuid(),
       amount: values.amount,
       type: values.type,
       date: values.date,
       recurring: values.recurring,
-      category:values.category,
-      count:values.count
+      category: values.category,
+      count: values.count
     }))
     setValues({
       id: uuid(),
       amount: "",
-      type: "Expense" ,
+      type: "Expense",
       date: "",
-      recurring:false,
-      count:1,
-      category:"shopping" as Type
+      recurring: false,
+      count: 1,
+      category: "shopping" as Type
     })
   }
 
@@ -88,7 +84,11 @@ export default function Transaction() {
           <Stack spacing={2}>
             <TextField
               label="Amount"
-              data-testid="amount"
+              slotProps={{
+                htmlInput: {
+                  "data-testid": "amount",
+                },
+              }}
               type="number"
               fullWidth
               value={values.amount}
@@ -99,19 +99,28 @@ export default function Transaction() {
             />
             <TextField
               label="Category"
-              data-testid="Category"
+              slotProps={{
+                htmlInput: {
+                  "data-testid": "Category",
+                },
+              }}
+
               type="text"
               fullWidth
               value={values.category}
               onChange={(e) =>
-                setValues({ ...values, category: e.target.value  })
+                setValues({ ...values, category: e.target.value })
               }
               required
             />
             <TextField
               select
               label="Type"
-              data-testid="Type"
+              slotProps={{
+                htmlInput: {
+                  "data-testid": "Type",
+                },
+              }}
               fullWidth
               value={values.type}
               onChange={(e) =>
@@ -123,8 +132,12 @@ export default function Transaction() {
               <MenuItem value="Expense">Expense</MenuItem>
             </TextField>
             <TextField
-              data-testid="date"
               type="date"
+              slotProps={{
+                htmlInput: {
+                  "data-testid": "date",
+                },
+              }}
               fullWidth
               value={values.date}
               onChange={(e) =>
@@ -136,12 +149,12 @@ export default function Transaction() {
               control={
                 <Checkbox
                   checked={values.recurring}
-                  onChange={(e) => setValues({...values,recurring:e.target.checked})}
+                  onChange={(e) => setValues({ ...values, recurring: e.target.checked })}
                 />
               }
               label="Mark as Recurring"
-              data-testid="check"
-              />
+             
+            />
             <Button
               variant="contained"
               data-testid="Btn"
@@ -149,6 +162,7 @@ export default function Transaction() {
               size="large"
               onClick={handleTransaction}
               sx={{ mt: 1 }}
+              disabled={!isValid}
             >
               Save Transaction
             </Button>

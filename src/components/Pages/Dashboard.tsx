@@ -27,7 +27,7 @@ function Dashboard() {
     if (!user) {
       navigate("/login", { replace: true });
     }
-    console.log("UseEffect is running")
+    console.log("Useffect is running")
   }, [user,navigate]);
 
   if(!user){

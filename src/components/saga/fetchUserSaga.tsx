@@ -4,12 +4,7 @@ import { type SagaIterator } from 'redux-saga';
 import { fetchUsersApi } from '../api/fetchusers';
 import { userAuthorisation } from '../api/userAuthorisation';
 
-export interface User {
-    id: number;
-    firstName: string;
-    lastName: string;   
-    email: string;
-}
+
 
 export function* handleLogin(action:ReturnType<typeof loginRequest>): SagaIterator {
     
@@ -42,7 +37,7 @@ export function* handleLogin(action:ReturnType<typeof loginRequest>): SagaIterat
     }
 }
 
-function* handleRestore(){
+export function* handleRestore(){
     console.log("Testing")
     try{
     const user=sessionStorage.getItem('session_user');
@@ -81,7 +76,7 @@ catch(err){
 }
 
 
-function* handleLogout(){
+export function* handleLogout(){
     sessionStorage.removeItem('session_user');
 }
 

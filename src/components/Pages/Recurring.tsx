@@ -31,41 +31,12 @@ function Recurring() {
   const itemsPerPage = 10;
   const lastIndex = currentPage * itemsPerPage;
   const firstIndex = lastIndex - itemsPerPage;
-  console.log(transactions)
+  // console.log(transactions)
   const pageItems = recursiveTransactions.slice(firstIndex, lastIndex)
 
-  console.log(pageItems)
+  // console.log(pageItems)
   const totalPages = Math.ceil(transactions.length / itemsPerPage)
 
-//   function calculateNextTransaction(dateInput: string | Date): string {
-//   const date = new Date(dateInput);
-//   date.setDate(date.getDate() + 30);
-//   console.log(date)
-//   const lastDate=date.toISOString().split('T')[0];
-//   return lastDate;
-// }
- 
-
-
-
-
-
-//  function compareDates(dateInput:any,count:any){
-//   const date = new Date(dateInput);
-//   date.setDate(date.getDate() + 25);
-//   const lastDate=date.toISOString().split('T')[0];
-//   console.log(lastDate);
-//   // const today=new Date().toISOString().split('T')[0];
-//   const today=new Date();
-//   today.setDate(today.getDate()+30);
-//   const comparedToday=today.toISOString().split('T')[0];
-//   console.log("Today",comparedToday);
- 
-//      if(comparedToday>lastDate){
-//        return dispatch(manageCounter(count));
-//      }
-//      return count
-//  }
    
    useEffect(()=>{
     dispatch(manageCounter())

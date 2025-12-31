@@ -15,12 +15,7 @@ import {
 import EditTransactionDialog from './EditTransaction';
 import { clearTransaction, deleteTransaction, sortTransaction, total } from '../slice/transactionSlice';
 
-export type Transaction = {
-    id: string;
-    amount: number;
-    type: string;
-    date: string;
-};
+
 export default function TransactionList() {
     const transactions = useAppSelector((state) => state.transaction.list)
     console.log(transactions);

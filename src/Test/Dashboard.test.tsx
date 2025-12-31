@@ -5,7 +5,7 @@ import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import { MemoryRouter } from "react-router-dom";
 import Dashboard from "../components/Pages/Dashboard";
-import transactionReducer, { transactions } from "../components/slice/transactionSlice";
+import transactionReducer from "../components/slice/transactionSlice";
 
 const mockedNavigate = jest.fn();
 jest.mock("react-router-dom", () => ({
@@ -50,7 +50,7 @@ describe("Dashboard Component", () => {
         expect(screen.getByText("Current Balance")).toBeInTheDocument();
         expect(screen.getAllByRole("heading", { level: 5 })).toHaveLength(3)
     })
-    test("renders transaction data when user session and data are present", async () => {
+    test("renders transaction data", async () => {
         const mockTransaction = {
             id: "1",
             type: "Expense",
@@ -65,7 +65,7 @@ describe("Dashboard Component", () => {
 
         renderWithProviders({
             transaction: {
-                transactions: [mockTransaction],
+                list: [mockTransaction],
                 totalItems: {
                     tAmount: 200,
                     Income: 0,
@@ -102,7 +102,7 @@ describe("Dashboard Component", () => {
         sessionStorage.setItem("session_user", JSON.stringify({ username: "Nishit" }));
         renderWithProviders({
             transaction: {
-                transactions: mockTransactions,
+                list: mockTransactions,
                 totalItems: {
                     tAmount: 400,
                     Income: 0,

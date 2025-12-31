@@ -1,15 +1,7 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
+import { initial } from '../../Types/types';
 
-type initial={
-    loading:Boolean,
-    users:users|null,
-    error?:string,
-    restoring:boolean
-}
-type users={
-    username:string,
-    password:string
-}
+
 const initialState:initial = {
     loading:false,
     users:null,

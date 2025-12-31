@@ -1,56 +1,101 @@
-import loginReducer,{loginError,logout,loginRequest,loginSuccess, restoreSession, restoreFinished} from "../components/slice/loginSlice"
-describe("Test the login slice",()=>{
-    const initialState = {
+import reducer, {
+  loginRequest,
+  loginSuccess,
+  loginError,
+  restoreSession,
+  restoreFinished,
+  logout,
+} from "../components/slice/loginSlice";
+
+describe("login slice", () => {
+
+  const initial = {
     loading: false,
     users: null,
     restoring: true,
-    error: undefined
+    error: undefined,
   };
-    test("Test initial state",()=>{
-      expect(loginReducer(undefined,{type:""})).toEqual({
-        loading:false,
-        users:null,
-        restoring:true
-      })
-    })
 
-    test("Test the login Request",()=>{
-        const previousState={loading:true}
-        expect(loginReducer(previousState as any,loginRequest({username:"Nishit",password:"123"}))).toEqual({
-           loading:true
-        })
-    })
+  test("returns initial state", () => {
+    expect(reducer(undefined, { type: "UNKNOWN" } as any)).toEqual({
+      loading: false,
+      users: null,
+      restoring: true,
+    });
+  });
 
-    test("Test the login Success",()=>{
-         const user = { username: "john", password: "123" };
+  test("loginRequest execution", () => {
+    const prev = { ...initial, restoring: false };
 
-    const state = loginReducer({ ...initialState, loading: true },loginSuccess(user));
+    const state = reducer(prev, loginRequest({ username: "a", password: "b" }));
 
-    expect(state.users).toEqual(user);
-    expect(state.loading).toBe(false);
+    expect(state).toEqual({
+      ...prev,
+      loading: true,
+    });
+  });
+
+  test("loginSuccess", () => {
+    const user = { username: "john", password: "123" };
+
+    const state = reducer(
+      { ...initial, loading: true },
+      loginSuccess(user)
+    );
+
+    expect(state).toEqual({
+      loading: false,
+      users: user,
+      restoring: false,
+    });
+  });
+
+  test("loginError", () => {
+    const state = reducer(
+      { ...initial, loading: true },
+      loginError("Invalid Credentials")
+    );
+
+    expect(state).toEqual({
+      ...initial,
+      loading: false,
+      error: "Invalid Credentials",
+      restoring: false,
+    });
+  });
+
+  test("restoreSession", () => {
+    const state = reducer(
+      { ...initial, restoring: false },
+      restoreSession()
+    );
+
+    expect(state.restoring).toBe(true);
+  });
+
+  test("restoreFinished", () => {
+    const state = reducer(
+      { ...initial, restoring: true },
+      restoreFinished()
+    );
+
     expect(state.restoring).toBe(false);
-    })
+  });
 
-    test("Test the login Error",()=>{
-        const state=loginReducer({...initialState,loading:true},loginError("Inavlid Credentials"))
-        expect(state.loading).toBe(false);
-        expect(state.error).toBe("Inavlid Credentials")
-        expect(state.restoring).toBe(false);
-    })
+  test("logout", () => {
+    const state = reducer(
+      {
+        ...initial,
+        users: { username: "abc", password: "123" },
+        restoring: true,
+      },
+      logout()
+    );
 
-    test("Test the restore session",()=>{
-        const state=loginReducer({...initialState,restoring:false},restoreSession())
-        expect(state.restoring).toBe(true);
-    })  
-
-    test("Handle Logout",()=>{
-        const state=loginReducer({...initialState,users:{username:"Nishit",password:"1234"}},logout())
-        expect(state.users).toBe(null);
-        expect(state.restoring).toBe(false);
-    })
-
-    test("Restore finished Testing",()=>{
-        const state=loginReducer({...initialState,restoring:true},restoreFinished())
-        expect(state.restoring).toBe(false);
-    })
-})
+    expect(state).toEqual({
+      loading: false,
+      users: null,
+      restoring: false,
+    });
+  });
+});

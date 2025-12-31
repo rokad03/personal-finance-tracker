@@ -12,9 +12,8 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { editTransaction, Type } from "../slice/transactionSlice";
-import Recurring from "./Recurring";
-
+import { editTransaction} from "../slice/transactionSlice";
+import { Type } from "../../Types/types";
 export default function EditTransactionDialog({ tx, onClose }: any) {
     const dispatch = useDispatch();
 
@@ -49,6 +48,11 @@ export default function EditTransactionDialog({ tx, onClose }: any) {
                 <Stack spacing={2} sx={{ mt: 1 }}>
                     <TextField
                         label="Amount"
+                        slotProps={{
+                            htmlInput:{
+                                "data-testid":"EditedAmount"
+                            }
+                        }}
                         type="number"
                         fullWidth
                         value={values.amount}
@@ -60,6 +64,11 @@ export default function EditTransactionDialog({ tx, onClose }: any) {
                     <TextField
                         label="Categpry"
                         type="text"
+                        slotProps={{
+                            htmlInput:{
+                                "data-testid":"EditedCategory"
+                            }
+                        }}
                         fullWidth
                         value={values.category}
                         onChange={(e) =>
@@ -84,6 +93,11 @@ export default function EditTransactionDialog({ tx, onClose }: any) {
                         type="date"
                         fullWidth
                         value={values.date}
+                        slotProps={{
+                            htmlInput:{
+                                  "data-testid":"EditedDate"
+                            }
+                        }}
                         onChange={(e) =>
                             setValues({ ...values, date: e.target.value })
                         }
@@ -96,7 +110,7 @@ export default function EditTransactionDialog({ tx, onClose }: any) {
                                 onChange={(e) => setValues({ ...values, recurring: e.target.checked })}
                             />
                         }
-                        label="Mark as Recurring"
+                        label="Marks as Recurring"
                     />
                 </Stack>
             </DialogContent>
