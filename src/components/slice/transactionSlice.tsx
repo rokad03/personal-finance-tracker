@@ -49,6 +49,7 @@ export const transactions=createSlice({
     },
     manageCounter:(state)=>{
       const today=todayStr();
+      
       state.list.forEach((tx)=>{
         console.log(tx.count)
         if(!tx.recurring){
@@ -57,6 +58,12 @@ export const transactions=createSlice({
         const due=addDays(tx.date,30);
         if(today>=due){
          tx.count+=1
+         if(tx.type==="Expense"){
+          state.totalItems.Expense+=Number(tx.amount);
+         }
+         else{
+          state.totalItems.Income+=Number(tx.amount);
+         }
          tx.date=due
         }
       })

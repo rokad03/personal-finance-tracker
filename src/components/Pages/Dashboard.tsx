@@ -11,40 +11,44 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
-import styles from './Dashboard.module.css'
+
 import Navbar from "../Navbar";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useAppSelector } from "../hooks";
 
 function Dashboard() {
-  const {totalItems}=useAppSelector((state)=>state.transaction)
-  const {tAmount,Income=0,Expense=0,top5}=totalItems;
+  const { totalItems } = useAppSelector((state) => state.transaction)
+  const { Income = 0, Expense = 0, top5 } = totalItems;
   const navigate = useNavigate();
   const user = sessionStorage.getItem("session_user")
-  console.log("Testing user before useEffect",user);
   useEffect(() => {
     if (!user) {
       navigate("/login", { replace: true });
     }
-    console.log("Useffect is running")
-  }, [user,navigate]);
 
-  if(!user){
+  }, [user, navigate]);
+
+  if (!user) {
     return (<h1>User session expires</h1>)
   }
   const u = JSON.parse(user ? user : "");
-  console.log(tAmount)
+
   return (
     <>
       <Navbar></Navbar>
-      <h1 className={styles.h1}>Welcome {u.username} </h1>
+      <Typography
+        variant="h4"
+        sx={{ textAlign: 'center', width: '100%', margin:'15px'}}
+      >
+        Welcome {u.username}
+      </Typography>
       <Grid container spacing={2} justifyContent="center" alignContent="center">
         <Card sx={{ bgcolor: "#daebdcff" }}>
           <CardContent>
             <Typography variant="subtitle1">Total Income</Typography>
             <Typography variant="h5" color="success.main">
-             {Income}
+              {Income}
             </Typography>
           </CardContent>
         </Card>
@@ -62,11 +66,11 @@ function Dashboard() {
 
 
 
-        <Card sx={{ bgcolor: "#e3f2fd" }}>
+        <Card sx={{ bgcolor: (Income-Expense>=0)?"#daebdcff":"#ffebee" }}>
           <CardContent>
             <Typography variant="subtitle1">Current Balance</Typography>
             <Typography variant="h5" color="error.main">
-              {Income-Expense}
+              {Income - Expense}
             </Typography>
           </CardContent>
         </Card>
@@ -74,39 +78,39 @@ function Dashboard() {
       </Grid>
 
       <TableContainer component={Paper} sx={{ maxWidth: 900, mx: "auto", mt: 3 }}>
-      <Typography variant="h6" sx={{ p: 2 }}>
-        Total Amount By Category
-      </Typography>
+        <Typography variant="h6" sx={{ p: 2 }}>
+          Total Amount By Category
+        </Typography>
 
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>Type</TableCell>
-            <TableCell align="right">Amount (₹)</TableCell>  
-          </TableRow>
-        </TableHead>
-
-        <TableBody>
-          {!top5 && (
+        <Table>
+          <TableHead>
             <TableRow>
-              <TableCell colSpan={4} align="center">
-                No Stats found
-              </TableCell>
+              <TableCell>Type</TableCell>
+              <TableCell align="right">Amount (₹)</TableCell>
             </TableRow>
-          )}
-          {top5 && top5.map((tx,i) => (
-            <TableRow key={i}>
-              <TableCell>{tx.category}</TableCell>
-              <TableCell align="right">
-                {tx.amount}
-              </TableCell>
-            </TableRow>
-          ))}
+          </TableHead>
 
-          
-        </TableBody>
-      </Table>
-    </TableContainer>
+          <TableBody>
+            {!top5 && (
+              <TableRow>
+                <TableCell colSpan={4} align="center">
+                  No Stats found
+                </TableCell>
+              </TableRow>
+            )}
+            {top5 && top5.map((tx, i)=> (
+              <TableRow key={i}>
+                <TableCell>{tx.category}</TableCell>
+                <TableCell align="right">
+                  {tx.amount}
+                </TableCell>
+              </TableRow>
+            ))}
+
+
+          </TableBody>
+        </Table>
+      </TableContainer>
     </>
 
   )

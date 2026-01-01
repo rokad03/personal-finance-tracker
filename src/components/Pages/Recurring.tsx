@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import { useAppDispatch, useAppSelector } from '../hooks';
 import { manageCounter, sortTransaction } from '../slice/transactionSlice';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 const addDays=(dateStr:string,days:number)=>{
   const [y,m,d]=dateStr.split("-").map(Number);
@@ -20,13 +21,16 @@ const addDays=(dateStr:string,days:number)=>{
   return dt.toISOString().slice(0,10)
 }
 
-const formatedDate=(d:Date)=>
-  d.toISOString().split("T")[0];
+
 
 function Recurring() {
   const dispatch = useAppDispatch();
+  const navigate=useNavigate();
   const transactions = useAppSelector((state) => state.transaction.list);
+
   const recursiveTransactions = transactions.filter((t) => t.recurring === true)
+
+
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const lastIndex = currentPage * itemsPerPage;
@@ -36,11 +40,16 @@ function Recurring() {
 
   // console.log(pageItems)
   const totalPages = Math.ceil(transactions.length / itemsPerPage)
+  
+   const user = sessionStorage.getItem("session_user")
+   useEffect(() => {
+    if (!user) {
+      navigate("/login", { replace: true });
+    }
+  }, [user, navigate]);
 
-   
    useEffect(()=>{
     dispatch(manageCounter())
-    
    },[dispatch])
 
    
@@ -108,8 +117,8 @@ function Recurring() {
         alignItems="center"
       >
         <Button onClick={() => setCurrentPage(prev => prev - 1)} disabled={currentPage === 1}>Prev</Button>
-        <Typography>{currentPage} of {totalPages}</Typography>
-        <Button onClick={() => setCurrentPage(next => next + 1)} disabled={currentPage === totalPages}>Next</Button>
+        <Typography>{currentPage} of {Math.max(1,totalPages)}</Typography>
+        <Button onClick={() => setCurrentPage(next => next + 1)} disabled={currentPage === totalPages || totalPages===1 }>Next</Button>
       </Stack>
 
 

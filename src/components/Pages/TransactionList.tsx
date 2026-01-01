@@ -18,7 +18,6 @@ import { clearTransaction, deleteTransaction, sortTransaction, total } from '../
 
 export default function TransactionList() {
     const transactions = useAppSelector((state) => state.transaction.list)
-    console.log(transactions);
     const dispatch = useAppDispatch();
     const [selectedId, setSelectedId] = useState<null | any>(null);
     const tAmount = transactions.reduce((sum, t) => sum + Number(t.amount), 0)
@@ -26,10 +25,10 @@ export default function TransactionList() {
     const Expense= transactions.filter((t) => t.type === "Expense").reduce((sum, i) => sum + Number(i.amount), 0)
     const categorySorting:Record<string,number>={}
     transactions.forEach((t)=>{
-     categorySorting[t.category]=(categorySorting[t.category]||0)+Number(t.amount);
-    })
+        categorySorting[t.category]=(categorySorting[t.category]||0)+Number(t.amount);
+        })
     const top5=Object.entries(categorySorting).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([category,amount])=>({category,amount}))
-    console.log("top5",top5);
+
     useEffect(() => {
         dispatch(total({
             tAmount,
@@ -38,14 +37,15 @@ export default function TransactionList() {
             top5
         }))
     }, [tAmount, Income,Expense,dispatch,top5])
+
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
     const lastIndex = currentPage * itemsPerPage;
     const firstIndex = lastIndex - itemsPerPage;
-    console.log(transactions)
+    // console.log(transactions)
     const pageItems = transactions.slice(firstIndex, lastIndex)
   
-    console.log(pageItems)
+    // console.log(pageItems)
     const totalPages = Math.ceil(transactions.length / itemsPerPage)
     return (
         <>
@@ -116,8 +116,8 @@ export default function TransactionList() {
                 alignItems="center"
             >
                 <Button onClick={() => setCurrentPage(prev => prev - 1)} disabled={currentPage === 1}>Prev</Button>
-                <Typography>{currentPage} of {totalPages}</Typography>
-                <Button onClick={() => setCurrentPage(next => next + 1)} disabled={currentPage ===  totalPages}>Next</Button>
+                <Typography>{currentPage} of {Math.max(1,totalPages)}</Typography>
+                <Button onClick={() => setCurrentPage(next => next + 1)} disabled={currentPage ===  totalPages || totalPages===1}>Next</Button>
             </Stack>
             {
                 selectedId && (<EditTransactionDialog tx={selectedId} onClose={() => setSelectedId(null)} />)

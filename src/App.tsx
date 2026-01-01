@@ -23,7 +23,7 @@ export default function App() {
         <Route path="/dashboard" element={<Dashboard />} /> 
         <Route element={<MainLayout />}>
         <Route path="/transactions" element={<ProtectedRoute><Transaction /></ProtectedRoute>} />
-        <Route path="/recurring-transactions" element={<Recurring />} />
+        <Route path="/recurring-transactions" element={<ProtectedRoute><Recurring /></ProtectedRoute>} />
         </Route>
       </Routes>
       </BrowserRouter>

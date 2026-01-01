@@ -20,7 +20,6 @@ import { fetchUsersApi } from "../components/api/fetchusers";
 import { userAuthorisation } from "../components/api/userAuthorisation";
 
 
-const mockSet = jest.spyOn(Storage.prototype, "setItem");
 const mockGet = jest.spyOn(Storage.prototype, "getItem");
 const mockRemove = jest.spyOn(Storage.prototype, "removeItem");
 
@@ -61,9 +60,15 @@ describe("handleLogin", () => {
     ).toEqual(call(userAuthorisation, { username: "john", password: "123" }));
     const mockAuth = { token: "abc" };
 
-    const success = gen.next(mockAuth).value as any;
+    const success = gen.next(mockAuth).value
 
-    expect(success.type).toBe(put(loginSuccess({}) as any).type);
+    expect(success).toEqual(put(loginSuccess({
+      id: 1,
+      username: "john",
+      password: "123",
+      token: "abc",
+      expiresAt: expect.any(Number),
+    })));
 
     expect(gen.next().done).toBe(true);
   });
@@ -92,6 +97,9 @@ describe("handleLogin", () => {
 
     expect(gen.next().done).toBe(true);
   });
+
+
+
 });
 
 
@@ -110,7 +118,7 @@ describe("handleRestore", () => {
 
     const gen = handleRestore();
 
-    const effect = gen.next().value; 
+    const effect = gen.next().value;
 
     expect(mockRemove).toHaveBeenCalledWith("session_user");
     expect(effect).toEqual(put(loginError("corrupt")));
@@ -122,7 +130,7 @@ describe("handleRestore", () => {
 
     const gen = handleRestore();
 
-    const effect=gen.next().value; 
+    const effect = gen.next().value;
 
     expect(mockRemove).toHaveBeenCalledWith("session_user");
     expect(effect).toEqual(
@@ -131,7 +139,7 @@ describe("handleRestore", () => {
     expect(gen.next().done).toBe(true);
   });
 
-  test(" expired session → remove + loginError", () => {
+  test(" expired session, remove + loginError", () => {
     mockGet.mockReturnValue(
       JSON.stringify({
         username: "john",
@@ -141,7 +149,7 @@ describe("handleRestore", () => {
 
     const gen = handleRestore();
 
-    const effect=gen.next().value;
+    const effect = gen.next().value;
 
     expect(mockRemove).toHaveBeenCalledWith("session_user");
     expect(effect).toEqual(
@@ -160,17 +168,25 @@ describe("handleRestore", () => {
 
     const gen = handleRestore();
 
-    const effect=gen.next().value; 
+    const effect = gen.next().value;
     expect(effect).toEqual(put(loginSuccess(user)));
     expect(gen.next().done).toBe(true);
   });
-  // test.only("Error in try Block",()=>{
-  //    mockGet.mockReturnValue(null);
-  //    const gen=handleRestore();
-  //    gen.next();
-  //    expect(mockRemove).toHaveBeenCalledWith("session_user")
-  // })
- });
+  test("API throws handleRestore", () => {
+
+    mockGet.mockImplementation(() => {
+      throw new Error("Test Error");
+    });
+
+    const gen = handleRestore();
+    gen.next();
+
+    expect(mockRemove).toHaveBeenCalledWith("session_user");
+
+    expect(gen.next().done).toBe(true);
+
+  });
+});
 
 
 describe("handleLogout", () => {

@@ -9,7 +9,8 @@ import {
   TextField,
   Typography,
   Checkbox,
-  FormControlLabel
+  FormControlLabel,
+  Alert
 } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { addTransaction } from "../slice/transactionSlice";
@@ -17,11 +18,13 @@ import TransactionList from "./TransactionList";
 import { useNavigate } from "react-router-dom";
 
 import { Type, Values } from "../../Types/types"
+import { useAppSelector } from "../hooks";
 
 
 export default function Transaction() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  
   const [values, setValues] = useState<Values>({
     id: "",
     amount: "",
@@ -37,7 +40,6 @@ export default function Transaction() {
     values.category.trim() !== "" &&
     values.date.trim() !== "" &&
     values.type.trim() !== "";
-  console.log(user);
   useEffect(() => {
     if (!user) {
       navigate("/login", { replace: true });
@@ -64,7 +66,7 @@ export default function Transaction() {
       category: "shopping" as Type
     })
   }
-
+ 
   return (
     <>
       <Paper
@@ -81,6 +83,8 @@ export default function Transaction() {
         </Typography>
 
         <Box component="form">
+
+
           <Stack spacing={2}>
             <TextField
               label="Amount"
@@ -95,6 +99,7 @@ export default function Transaction() {
               onChange={(e) =>
                 setValues({ ...values, amount: e.target.value })
               }
+             
               required
             />
             <TextField

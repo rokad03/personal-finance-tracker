@@ -4,7 +4,11 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import Recurring from "../components/Pages/Recurring";
 import transactionReducer from "../components/slice/transactionSlice";
-
+const mockedNavigate = jest.fn();
+jest.mock("react-router-dom", () => ({
+    ...jest.requireActual("react-router-dom"),
+    useNavigate: () => mockedNavigate,
+}));
 const renderWithStore = (preloadedState={}) => {
   const store = configureStore({
     reducer: { transaction: transactionReducer },
@@ -25,7 +29,11 @@ const addDays = (dateStr: string, days: number) => {
 };
 
 describe("Recurring Page", () => {
-
+ 
+   test("redirects to login if no user session exists", () => {
+        renderWithStore();
+        expect(mockedNavigate).toHaveBeenCalledWith("/login", { replace: true });
+    });
   test("No recurring transactions exist", () => {
     renderWithStore({
       transaction: { list: [], totalItems: {} },

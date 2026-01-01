@@ -1,8 +1,0 @@
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px 32px;
-  background-color: rgb(200, 195, 195);
-  list-style: none;
-}

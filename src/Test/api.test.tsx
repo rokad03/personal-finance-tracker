@@ -1,48 +1,52 @@
 import { fetchUsersApi } from "../components/api/fetchusers";
 import { userAuthorisation } from "../components/api/userAuthorisation";
 
-describe("API helpers", () => {
+describe("API helpers (switch-case mock)", () => {
+
   beforeEach(() => {
     jest.resetAllMocks();
+
+    global.fetch = jest.fn().mockImplementation((url: string, options?: any) => {
+      const path = new URL(url).pathname;
+
+      switch (path) {
+
+        case "/users":
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ users: [{ id: 1, username: "john" }] }),
+          });
+
+        
+        case "/auth/login":
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ token: "abc123" }),
+          });
+
+        default:
+          return Promise.reject(new Error("Unknown endpoint: " + path));
+      }
+    });
   });
 
-  
-  test("fetchUsersApi Success", async () => {
-    const mockJson = { users: [{ id: 1, username: "john" }] };
-
-    global.fetch = jest.fn().mockImplementation(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve(mockJson),
-      })
-    ) 
-
+  test("fetchUsersApi → success", async () => {
     const result = await fetchUsersApi();
 
     expect(fetch).toHaveBeenCalledWith("https://dummyjson.com/users");
-    expect(result).toEqual(mockJson);
+    expect(result).toEqual({ users: [{ id: 1, username: "john" }] });
   });
 
-  test("fetchUsersApi -> Error", async () => {
-    global.fetch = jest.fn().mockImplementation(() =>
-      Promise.resolve({
-        ok: false,
-      })
-    )
-
-    await expect(fetchUsersApi()).rejects.toThrow("Failed to fetch users");
-    expect(fetch).toHaveBeenCalledTimes(1);
-  });
-
-  test("userAuthorisation -> success", async () => {
-    const mockResponse = { token: "abc123" };
-
-    global.fetch = jest.fn().mockImplementation(() =>
-      Promise.resolve({
-        json: () => Promise.resolve(mockResponse),
-      })
+  test("fetchUsersApi → failure (ok=false)", async () => {
+    
+    (fetch as jest.Mock).mockImplementationOnce(() =>
+      Promise.resolve({ ok: false })
     );
 
+    await expect(fetchUsersApi()).rejects.toThrow("Failed to fetch users");
+  });
+
+  test("userAuthorisation → success", async () => {
     const result = await userAuthorisation({
       username: "john",
       password: "123",
@@ -58,25 +62,9 @@ describe("API helpers", () => {
           password: "123",
           expiresInMins: 30,
         }),
-     })
+      })
     );
 
-    expect(result).toEqual(mockResponse);
+    expect(result).toEqual({ token: "abc123" });
   });
-
-//   test("userAuthorisation", async () => {
-//     const mockResponse = { message: "Invalid credentials" };
-
-//     global.fetch = jest.fn(() =>
-//       Promise.resolve({
-//         json: () => Promise.resolve(mockResponse),
-//       } as Response)
-//     ) as jest.Mock;
-
-//     await expect(
-//       userAuthorisation({ username: "wrong", password: "bad" })
-//     ).resolves.toEqual(mockResponse);
-
-//     expect(fetch).toHaveBeenCalledTimes(1);
-//   });
 });

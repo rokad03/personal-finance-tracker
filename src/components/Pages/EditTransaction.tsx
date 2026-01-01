@@ -12,11 +12,15 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { editTransaction} from "../slice/transactionSlice";
-import { Type } from "../../Types/types";
-export default function EditTransactionDialog({ tx, onClose }: any) {
+import { editTransaction } from "../slice/transactionSlice";
+import { Transaction, Type } from "../../Types/types";
+type EditTransactionType={
+    tx:Transaction,
+    onClose:()=>void;
+}
+export default function EditTransactionDialog({ tx, onClose }: EditTransactionType) {
     const dispatch = useDispatch();
-
+  
     const [values, setValues] = useState({
         id: tx.id,
         type: tx.type,
@@ -26,8 +30,16 @@ export default function EditTransactionDialog({ tx, onClose }: any) {
         count: tx.count,
         category: tx.category
     });
-    console.log(values);
+      const isValid =
+        values.amount.trim() !== "" &&
+        values.category.trim() !== "" &&
+        values.date.trim() !== "" &&
+        values.type.trim() !== "";
+   
     const submit = () => {
+        if(!isValid){
+            return;
+        }
         dispatch(editTransaction({
             id: values.id,
             amount: values.amount,
@@ -49,8 +61,8 @@ export default function EditTransactionDialog({ tx, onClose }: any) {
                     <TextField
                         label="Amount"
                         slotProps={{
-                            htmlInput:{
-                                "data-testid":"EditedAmount"
+                            htmlInput: {
+                                "data-testid": "EditedAmount"
                             }
                         }}
                         type="number"
@@ -65,8 +77,8 @@ export default function EditTransactionDialog({ tx, onClose }: any) {
                         label="Categpry"
                         type="text"
                         slotProps={{
-                            htmlInput:{
-                                "data-testid":"EditedCategory"
+                            htmlInput: {
+                                "data-testid": "EditedCategory"
                             }
                         }}
                         fullWidth
@@ -94,8 +106,8 @@ export default function EditTransactionDialog({ tx, onClose }: any) {
                         fullWidth
                         value={values.date}
                         slotProps={{
-                            htmlInput:{
-                                  "data-testid":"EditedDate"
+                            htmlInput: {
+                                "data-testid": "EditedDate"
                             }
                         }}
                         onChange={(e) =>
