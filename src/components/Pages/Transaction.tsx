@@ -10,7 +10,8 @@ import {
   Typography,
   Checkbox,
   FormControlLabel,
-  Alert
+  Alert,
+  InputLabel
 } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { addTransaction } from "../slice/transactionSlice";
@@ -30,11 +31,13 @@ export default function Transaction() {
     amount: "",
     type: "Expense",
     date: "",
-    category: "shopping",
+    category: "",
     recurring: false,
-    count: 1
+    count: 1,
+    expiryDate:""
   });
   const user = sessionStorage.getItem("session_user")
+  
   const isValid =
     values.amount.trim() !== "" &&
     values.category.trim() !== "" &&
@@ -45,6 +48,7 @@ export default function Transaction() {
       navigate("/login", { replace: true });
     }
   }, [user, navigate]);
+
   function handleTransaction() {
     if (!isValid) return
     dispatch(addTransaction({
@@ -54,7 +58,8 @@ export default function Transaction() {
       date: values.date,
       recurring: values.recurring,
       category: values.category,
-      count: values.count
+      count: values.count,
+      expiryDate:values.expiryDate
     }))
     setValues({
       id: uuid(),
@@ -63,7 +68,8 @@ export default function Transaction() {
       date: "",
       recurring: false,
       count: 1,
-      category: "shopping" as Type
+      category: "" as Type,
+      expiryDate:""
     })
   }
  
@@ -99,7 +105,6 @@ export default function Transaction() {
               onChange={(e) =>
                 setValues({ ...values, amount: e.target.value })
               }
-             
               required
             />
             <TextField
@@ -160,6 +165,26 @@ export default function Transaction() {
               label="Mark as Recurring"
              
             />
+            {(values.recurring)&&(
+            <>
+            <InputLabel>Enter the Expiry Date</InputLabel>
+            <TextField
+              type="date"
+              slotProps={{
+                htmlInput: {
+                  "data-testid": "expiryDate",
+                },
+              }}
+              fullWidth
+              value={values.expiryDate}
+              onChange={(e) =>
+                setValues({ ...values, expiryDate: e.target.value })
+              }
+              required
+            />
+            </>
+            )
+            }
             <Button
               variant="contained"
               data-testid="Btn"

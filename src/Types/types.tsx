@@ -11,7 +11,8 @@ export type Values = {
   category: string,
   date: string,
   recurring:boolean,
-  count:number
+  count:number,
+  expiryDate?:string
 }
 export interface User {
     id: number;
@@ -37,7 +38,8 @@ export type Transaction = {
   date: string;
   recurring: boolean;
   count:number;
-  category:string
+  category:string;
+  expiryDate?:string
 };
 type CategoryListing={
     category:string;

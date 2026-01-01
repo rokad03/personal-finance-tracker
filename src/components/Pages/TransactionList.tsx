@@ -66,9 +66,12 @@ export default function TransactionList() {
                 <Table>
                     <TableHead>
                         <TableRow>
+                            <TableCell>TId</TableCell>
                             <TableCell>Date</TableCell>
+                            <TableCell>Exprity Date</TableCell>
                             <TableCell>Type</TableCell>
                             <TableCell>Category</TableCell>
+                            
                             <TableCell >Amount (₹)</TableCell>
                             
                             <TableCell align='right'>Recurring</TableCell>
@@ -79,7 +82,9 @@ export default function TransactionList() {
                     <TableBody>
                         {pageItems.map((tx, i) => (
                             <TableRow key={i}>
+                                <TableCell>{i+1}</TableCell>
                                 <TableCell>{tx.date}</TableCell>
+                                 <TableCell>{tx.expiryDate}</TableCell>
                                 <TableCell>{tx.type}</TableCell>
                                 <TableCell>{tx.category}</TableCell>
                                 <TableCell >
