@@ -39,7 +39,7 @@ function Recurring() {
   const pageItems = recursiveTransactions.slice(firstIndex, lastIndex)
 
   // console.log(pageItems)
-  const totalPages = Math.ceil(transactions.length / itemsPerPage)
+  const totalPages = Math.ceil(recursiveTransactions.length / itemsPerPage)
   
    const user = sessionStorage.getItem("session_user")
    useEffect(() => {
@@ -118,7 +118,7 @@ function Recurring() {
       >
         <Button onClick={() => setCurrentPage(prev => prev - 1)} disabled={currentPage === 1}>Prev</Button>
         <Typography>{currentPage} of {Math.max(1,totalPages)}</Typography>
-        <Button onClick={() => setCurrentPage(next => next + 1)} disabled={currentPage === totalPages || totalPages===1 }>Next</Button>
+        <Button onClick={() => setCurrentPage(next => next + 1)} disabled={currentPage === totalPages || Math.max(totalPages,1)===1 }>Next</Button>
       </Stack>
 
 

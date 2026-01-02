@@ -1,4 +1,9 @@
-
+// export type Transaction = {
+//     id: string;
+//     amount: number;
+//     type: string;
+//     date: string;
+// };
 export type Values = {
   id: string,
   amount: string,
@@ -46,5 +51,6 @@ export type Total={
   tAmount:number;
   Income:number;
   Expense:number;
-  top5:CategoryListing[]
+  top3Expense:CategoryListing[]
+  top3Income:CategoryListing[]
 }

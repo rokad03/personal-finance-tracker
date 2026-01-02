@@ -19,7 +19,7 @@ import { useAppSelector } from "../hooks";
 
 function Dashboard() {
   const { totalItems } = useAppSelector((state) => state.transaction)
-  const { Income = 0, Expense = 0, top5 } = totalItems;
+  const { Income = 0, Expense = 0, top3Income,top3Expense } = totalItems;
   const navigate = useNavigate();
   const user = sessionStorage.getItem("session_user")
   useEffect(() => {
@@ -77,40 +77,71 @@ function Dashboard() {
 
       </Grid>
 
-      <TableContainer component={Paper} sx={{ maxWidth: 900, mx: "auto", mt: 3 }}>
-        <Typography variant="h6" sx={{ p: 2 }}>
-          Total Amount By Category
-        </Typography>
-
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Type</TableCell>
-              <TableCell align="right">Amount (₹)</TableCell>
-            </TableRow>
-          </TableHead>
-
-          <TableBody>
-            {!top5 && (
-              <TableRow>
-                <TableCell colSpan={4} align="center">
-                  No Stats found
-                </TableCell>
-              </TableRow>
-            )}
-            {top5 && top5.map((tx, i)=> (
-              <TableRow key={i}>
-                <TableCell>{tx.category}</TableCell>
-                <TableCell align="right">
-                  {tx.amount}
-                </TableCell>
-              </TableRow>
-            ))}
-
-
-          </TableBody>
-        </Table>
-      </TableContainer>
+      
+      <Grid container spacing={3} sx={{ p: 3 }}>
+         
+          <Grid size={{ xs: 12, md: 6 }}  >
+            <TableContainer component={Paper} elevation={3}>
+              <Typography variant="h6" sx={{ p: 2, bgcolor: '#f5f5f5', borderBottom: '1px solid #ddd' }}>
+                Top 3 Expenses 
+              </Typography>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Category</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 'bold' }}>Amount (₹)</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {!top3Expense ? (
+                    <TableRow>
+                      <TableCell colSpan={2} align="center" sx={{ py: 3 }}>No Stats found</TableCell>
+                    </TableRow>
+                  ) : (
+                    top3Expense.map((tx: any, i: number) => (
+                      <TableRow key={`exp-${i}`} hover>
+                        <TableCell>{tx.category}</TableCell>
+                        <TableCell align="right">{tx.amount}</TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Grid>
+          
+          {/* Top 3 Incomes Table */}
+          <Grid size={{ xs: 12, md: 6 }}>
+            <TableContainer component={Paper} elevation={3}>
+              <Typography variant="h6" sx={{ p: 2, bgcolor: '#f5f5f5', borderBottom: '1px solid #ddd' }}>
+                Top 3 Incomes
+              </Typography>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Category</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 'bold' }}>Amount (₹)</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {!top3Income? (
+                    <TableRow>
+                      <TableCell colSpan={2} align="center" sx={{ py: 3 }}>No Stats found</TableCell>
+                    </TableRow>
+                  ) : (
+                    top3Income.map((tx: any, i: number) => (
+                      <TableRow key={`inc-${i}`} hover>
+                        <TableCell>{tx.category}</TableCell>
+                        <TableCell align="right">{tx.amount}</TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Grid>
+        </Grid>
+        
     </>
 
   )

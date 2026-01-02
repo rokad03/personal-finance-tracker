@@ -78,7 +78,8 @@ describe("transaction slice", () => {
       tAmount: 100,
       Income: 200,
       Expense: 100,
-      top5: [],
+      top3Expense: [],
+      top3Income:[]
     };
 
     const state = reducer(initialState, total(totals));

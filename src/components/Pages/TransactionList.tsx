@@ -27,16 +27,17 @@ export default function TransactionList() {
     transactions.forEach((t)=>{
         categorySorting[t.category]=(categorySorting[t.category]||0)+Number(t.amount);
         })
-    const top5=Object.entries(categorySorting).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([category,amount])=>({category,amount}))
+    const top3=Object.entries(categorySorting).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([category,amount])=>({category,amount}))
 
-    useEffect(() => {
-        dispatch(total({
-            tAmount,
-            Income,
-            Expense,
-            top5
-        }))
-    }, [tAmount, Income,Expense,dispatch,top5])
+    // useEffect(() => {
+    //     dispatch(total({
+    //         tAmount,
+    //         Income,
+    //         Expense,
+    //         // top3Income,
+    //         // top3Expense
+    //     }))
+    // }, [tAmount, Income,Expense,dispatch,top3])
 
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
