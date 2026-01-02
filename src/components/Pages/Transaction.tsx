@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { v4 as uuid } from "uuid";
 import {
   Box,
@@ -25,32 +25,50 @@ import { useAppSelector } from "../hooks";
 export default function Transaction() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  
+  const [showError, setShowError] = useState(false);
   const [values, setValues] = useState<Values>({
     id: "",
     amount: "",
-    type: "Expense",
+    type: "" as Type ,
     date: "",
     category: "",
     recurring: false,
     count: 1,
-    expiryDate:""
+    expiryDate:"",
+    interval:""
   });
   const user = sessionStorage.getItem("session_user")
   
-  const isValid =
+ const isValid = useMemo(() => {
+  
+  const basicFieldsValid = 
     values.amount.trim() !== "" &&
     values.category.trim() !== "" &&
     values.date.trim() !== "" &&
     values.type.trim() !== "";
+
+  const recurringFieldsValid = values.recurring 
+    ? (values.expiryDate !== "" && values.interval !== "") 
+    : true;
+
+  return basicFieldsValid && recurringFieldsValid;
+}, [values]);
+
+   
   useEffect(() => {
     if (!user) {
       navigate("/login", { replace: true });
     }
   }, [user, navigate]);
-
+  const Income = useAppSelector((state) => state.transaction.totalItems.Income);
+  const Expense = useAppSelector((state) => state.transaction.totalItems.Expense);
+  
   function handleTransaction() {
-    if (!isValid) return
+
+    if (!isValid) return;
+    console.log(Income,Expense,values.type)
+    if(Income<=Expense+Number(values.amount) && values.type==="Expense") {setShowError(true);return}
+    setShowError(false);
     dispatch(addTransaction({
       id: uuid(),
       amount: values.amount,
@@ -59,20 +77,21 @@ export default function Transaction() {
       recurring: values.recurring,
       category: values.category,
       count: values.count,
-      expiryDate:values.expiryDate
+      expiryDate:values.expiryDate,
+      interval:values.interval
     }))
     setValues({
       id: uuid(),
       amount: "",
-      type: "Expense",
+      type: "" as Type,
       date: "",
       recurring: false,
       count: 1,
       category: "" as Type,
-      expiryDate:""
+      expiryDate:"",
+      interval:""
     })
   }
- 
   return (
     <>
       <Paper
@@ -84,6 +103,7 @@ export default function Transaction() {
           borderRadius: 3,
         }}
       >
+        {(showError) && <Alert severity="error"><h4>Transaction should not be added as Income is less than or Equal to Expense</h4></Alert>}
         <Typography variant="h6" gutterBottom>
           Add Transaction
         </Typography>
@@ -108,22 +128,6 @@ export default function Transaction() {
               required
             />
             <TextField
-              label="Category"
-              slotProps={{
-                htmlInput: {
-                  "data-testid": "Category",
-                },
-              }}
-
-              type="text"
-              fullWidth
-              value={values.category}
-              onChange={(e) =>
-                setValues({ ...values, category: e.target.value })
-              }
-              required
-            />
-            <TextField
               select
               label="Type"
               slotProps={{
@@ -141,6 +145,23 @@ export default function Transaction() {
               <MenuItem value="Income">Income</MenuItem>
               <MenuItem value="Expense">Expense</MenuItem>
             </TextField>
+            <TextField
+              label="Category"
+              slotProps={{
+                htmlInput: {
+                  "data-testid": "Category",
+                },
+              }}
+
+              type="text"
+              fullWidth
+              value={values.category}
+              onChange={(e) =>
+                setValues({ ...values, category: e.target.value })
+              }
+              required
+            />
+            
             <TextField
               type="date"
               slotProps={{
@@ -167,7 +188,26 @@ export default function Transaction() {
             />
             {(values.recurring)&&(
             <>
-            <InputLabel>Enter the Expiry Date</InputLabel>
+            <TextField
+              select
+              label="Type"
+              slotProps={{
+                htmlInput: {
+                  "data-testid": "Recurring-type",
+                },
+              }}
+              fullWidth
+              value={values.interval}
+              onChange={(e) =>
+                setValues({ ...values, interval: e.target.value as Type })
+              }
+              required
+            >
+              <MenuItem value="Daily">Daily</MenuItem>
+              <MenuItem value="Monthly">Monthly</MenuItem>
+              <MenuItem value="Yearly">Yearly</MenuItem>
+            </TextField>
+            <InputLabel>Transaction Expiry Date</InputLabel>
             <TextField
               type="date"
               slotProps={{

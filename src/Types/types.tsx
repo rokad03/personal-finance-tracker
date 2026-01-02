@@ -1,9 +1,4 @@
-// export type Transaction = {
-//     id: string;
-//     amount: number;
-//     type: string;
-//     date: string;
-// };
+
 export type Values = {
   id: string,
   amount: string,
@@ -13,6 +8,7 @@ export type Values = {
   recurring:boolean,
   count:number,
   expiryDate?:string
+  interval?:string
 }
 export interface User {
     id: number;
@@ -40,6 +36,7 @@ export type Transaction = {
   count:number;
   category:string;
   expiryDate?:string
+  interval?:string
 };
 type CategoryListing={
     category:string;
