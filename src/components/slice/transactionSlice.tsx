@@ -9,7 +9,7 @@ interface TxState {
 const addDays=(dateStr:string,days:number)=>{
   const [y,m,d]=dateStr.split("-").map(Number);
   const dt=new Date(y,m-1,d+days)
-  return dt.toISOString().slice(0,10)
+  return dateStr;
 }
 
 const todayStr=()=>new Date().toISOString().slice(0,10);

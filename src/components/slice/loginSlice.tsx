@@ -32,6 +32,7 @@ export const loginSlice = createSlice({
         logout:(state)=>{
             state.users=null;
             state.restoring=false;
+            state.error="";
         },
        
     }           

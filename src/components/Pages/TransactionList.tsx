@@ -29,15 +29,6 @@ export default function TransactionList() {
         })
     const top3=Object.entries(categorySorting).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([category,amount])=>({category,amount}))
 
-    // useEffect(() => {
-    //     dispatch(total({
-    //         tAmount,
-    //         Income,
-    //         Expense,
-    //         // top3Income,
-    //         // top3Expense
-    //     }))
-    // }, [tAmount, Income,Expense,dispatch,top3])
 
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;

@@ -184,7 +184,7 @@ export default function TransactionForm({ onClose, tx }: TransactionType) {
                                 />
 
                                 <TextField
-                                    type="date"
+                                    type="datetime-local"
                                     slotProps={{
                                         htmlInput: {
                                             "data-testid": "date",
@@ -230,7 +230,7 @@ export default function TransactionForm({ onClose, tx }: TransactionType) {
                                         </TextField>
                                         <InputLabel>Transaction Expiry Date</InputLabel>
                                         <TextField
-                                            type="date"
+                                            type="datetime-local"
                                             slotProps={{
                                                 htmlInput: {
                                                     "data-testid": "expiryDate",

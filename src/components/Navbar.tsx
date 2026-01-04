@@ -8,7 +8,7 @@ function Navbar() {
   const dispatch=useDispatch();
   return (
     <>
-    <Box sx={{ flexGrow: 1 }}>
+    <Box sx={{ flexGrow: 1 }} >
       <AppBar position="static" role="navigation">
         <Toolbar>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
