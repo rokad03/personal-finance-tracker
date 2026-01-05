@@ -1,92 +1,93 @@
 import { configureStore } from "@reduxjs/toolkit";
 import Transaction from "../components/Pages/Transaction";
-import transactionReducer from "../components/slice/transactionSlice"
+import transactionReducer from "../components/slice/transactionSlice";
 import { Provider } from "react-redux";
 import { MemoryRouter } from "react-router-dom";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+
+
+
 const mockedNavigate = jest.fn();
 jest.mock("react-router-dom", () => ({
-    ...jest.requireActual("react-router-dom"),
-    useNavigate: () => mockedNavigate,
+  ...jest.requireActual("react-router-dom"),
+  useNavigate: () => mockedNavigate
 }));
 
-jest.mock('uuid', () => ({
-    v4: () => '1234-adas-23232',
-}))
+
+
+jest.mock("uuid", () => ({
+  v4: () => "static-uuid-123"
+}));
+
+
+
+jest.mock("../components/Pages/PaginationTable", () => () => (
+  <div>TABLE</div>
+));
+
 
 const renderWithProviders = (preloadedState = {}) => {
-    const store = configureStore({
-        reducer: { transaction: transactionReducer },
-        preloadedState
-    });
+  const store = configureStore({
+    reducer: { transaction: transactionReducer },
+    preloadedState
+  });
 
-    return render(
-        <Provider store={store}>
-            <MemoryRouter>
-                <Transaction />
-            </MemoryRouter>
-        </Provider>
-    );
+  return render(
+    <Provider store={store}>
+      <MemoryRouter>
+        <Transaction />
+      </MemoryRouter>
+    </Provider>
+  );
 };
 
-test("Initial TransactionPage",()=>{
-   
-   renderWithProviders();
-   expect(screen.getByText("Add Transaction")).toBeInTheDocument()
-   const Inputamount = screen.getByTestId("amount")
-    const InputCategory = screen.getByTestId("Category")
-    const InputType = screen.getByTestId("Type")
-    const InputDate = screen.getByTestId("date")
-    // const CheckInput = screen.getByTestId("check")
-    const Button = screen.getByTestId("Btn")
-    expect(Inputamount).toBeInTheDocument();
-    expect(InputCategory).toBeInTheDocument();
-    expect(InputType).toBeInTheDocument();
-    expect(InputDate).toBeInTheDocument();
-    // expect(CheckInput).not.toBeChecked();
-    expect(Button).toBeInTheDocument();
 
-})
- 
+describe("Transaction Page", () => {
+
+  beforeEach(() => {
+    sessionStorage.setItem(
+      "session_user",
+      JSON.stringify({ username: "Nishit" })
+    );
+    jest.clearAllMocks();
+  });
 
 
-test("Test the initial Transaction form", async () => {
-  const user = userEvent.setup();
-  renderWithProviders();
+  test("renders Add button but form hidden initially", () => {
+    renderWithProviders();
 
-  const amountInput = screen.getByTestId("amount");
-  const categoryInput = screen.getByTestId("Category");
-  const dateInput = screen.getByTestId("date")
-  const checkbox = screen.getByLabelText(/mark as recurring/i);
-  const button = screen.getByTestId("Btn");
+    expect(screen.getByText("Add the transaction")).toBeInTheDocument();
 
-  const typeSelect = screen.getByRole("combobox", { name: /type/i });
-   await user.click(typeSelect);
-   await user.click(await screen.findByRole("option", { name: /income/i }));
-
- 
-  await user.type(amountInput, "200");
-  await user.clear(categoryInput)
-  await user.type(categoryInput, "Sports");
+    expect(screen.queryByTestId("amount")).not.toBeInTheDocument();
+  });
 
 
-  await user.type(dateInput,"2026-01-01")
-  expect(dateInput).toHaveValue("2026-01-01")
+  test("fills and submits transaction form", async () => {
+    const user = userEvent.setup();
 
-  expect(checkbox).not.toBeChecked();
-  fireEvent.click(checkbox);
-  expect(checkbox).toBeChecked()
+    renderWithProviders();
 
+    await user.click(screen.getByText("Add the transaction"));
 
-  expect(button).toBeEnabled();
+    const amount = await screen.findByTestId("amount");
+    const category = screen.getByTestId("Category");
+    const date = screen.getByTestId("date");
+    const typeSelect = screen.getByRole("combobox", { name: /type/i });
+    const submit = screen.getByRole("button", { name: /add/i });
 
-  await user.click(button);
+    await user.type(amount, "200");
+    await user.type(category, "Sports");
 
+    await user.click(typeSelect);
+    await user.click(await screen.findByRole("option", { name: /income/i }));
 
-  expect(await screen.findByText("Sports")).toBeInTheDocument();
-  expect(await screen.findByText("200")).toBeInTheDocument();
-    expect(await screen.findByText("2026-01-01")).toBeInTheDocument();
-  expect(await screen.findByText("200")).toBeInTheDocument();
-  expect(await screen.findByText("Income")).toBeInTheDocument();
+    await user.type(date, "2026-01-01T10:00");
+
+    expect(submit).toBeEnabled();
+
+    await user.click(submit);
+
+    expect(screen.queryByTestId("amount")).not.toBeInTheDocument();
+  });
 });

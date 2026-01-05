@@ -8,7 +8,9 @@ import reducer, {
   manageCounter,
 } from "../components/slice/transactionSlice";
 import { Total, Transaction } from "../Types/types";
-
+(global as any).crypto = {
+  randomUUID: jest.fn(() => "mock-id-123"),
+};
 describe("transaction slice", () => {
   let setSpy: jest.SpyInstance;
   let removeSpy: jest.SpyInstance;
@@ -118,22 +120,24 @@ describe("transaction slice", () => {
     jest.setSystemTime(new Date("2025-02-01"));
 
     const recurringTx = {
-      id: "1",
-      type: "Expense",
-      amount: "50",
-      date: "2024-12-31", 
-      recurring: true,
-      count: 1,
-      category: "Netflix",
-    };
+    id: "1",
+    type: "Expense",
+    amount: "50",
+    date: "2025-01-01",
+    recurring: true,
+    count: 1,
+    category: "Netflix",
+    expiryDate: "None",
+    interval: "monthly"   
+  };
 
     const state = reducer(
       { ...initialState, list: [recurringTx] as any },
       manageCounter()
     );
 
-    expect(state.list[0].count).toBe(2);     
-    expect(state.list[0].date).toBe("2025-01-29"); 
+    expect(state.list[0].recurring).toBe(false);
+    expect(state.list[1].count).toBe(2); 
   });
 
   test("manageCounter does NOT increment when not due", () => {
@@ -147,6 +151,8 @@ describe("transaction slice", () => {
       recurring: true,
       count: 1,
       category: "Netflix",
+      expiryDate: "None",     
+    interval: "monthly"     
     };
 
     const state = reducer(
@@ -155,6 +161,7 @@ describe("transaction slice", () => {
     );
 
     expect(state.list[0].count).toBe(1);
+    expect(state.list[0].recurring).toBe(true);
   });
 
   test("manageCounter ignores non-recurring", () => {
@@ -167,4 +174,28 @@ describe("transaction slice", () => {
 
     expect(state.list[0].count).toBe(5);
   });
+
+    test("manageCounter ignores non-recurring transactions", () => {
+
+    const tx = {
+      id: "1",
+      type: "Expense",
+      amount: "50",
+      date: "2025-01-01",
+      recurring: false,
+      count: 5,
+      category: "Food",
+      expiryDate: "None",
+      interval: ""
+    };
+
+    const result = reducer(
+      { ...initialState, list: [tx] as any },
+      manageCounter()
+    );
+
+    expect(result.list[0].count).toBe(5);   
+    expect(result.list.length).toBe(1);     
+  });
+
 });

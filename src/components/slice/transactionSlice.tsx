@@ -6,13 +6,14 @@ interface TxState {
   list: Transaction[];
   totalItems:Total;
 }
-const addDays=(dateStr:string,days:number)=>{
-  const [y,m,d]=dateStr.split("-").map(Number);
-  const dt=new Date(y,m-1,d+days)
-  return dateStr;
-}
+const dateOnly = (d: string) => d.slice(0, 10);
 
-const todayStr=()=>new Date().toISOString().slice(0,10);
+const addDays = (d: string, n: number) => {
+  const [y,m,dd] = dateOnly(d).split("-").map(Number);
+  return new Date(y, m-1, dd + n).toISOString().slice(0,10);
+};
+
+
 const saved = sessionStorage.getItem("transaction");
 const savedTotalAmount=sessionStorage.getItem("totalSavedAmount")
 const initialState: TxState = {
@@ -47,28 +48,61 @@ export const transactions=createSlice({
       state.list=state.list.sort((a,b)=>(Number(b.amount)-Number(a.amount)))
       sessionStorage.setItem("totalSavedAmount",JSON.stringify(state.totalItems))
     },
-    manageCounter:(state)=>{
-      const today=todayStr();
-      
-      state.list.forEach((tx)=>{
-        console.log(tx.count)
-        if(!tx.recurring){
-            return;
-        }
-        const due=addDays(tx.date,30);
-        if(today>=due){
-         tx.count+=1
-         if(tx.type==="Expense"){
-          state.totalItems.Expense+=Number(tx.amount);
-         }
-         else{
-          state.totalItems.Income+=Number(tx.amount);
-         }
-         tx.date=due
-        }
-      })
-    
+   manageCounter:(state)=>{
+
+  const today = new Date().toISOString().slice(0,10);
+
+  state.list.forEach(tx => {
+
+    if (!tx.recurring) return;
+
+    let next = dateOnly(tx.date);
+
+    // stop if expired
+    if (tx.expiryDate !== "None" && dateOnly(tx.expiryDate??"") < today) {
+      return;
     }
+
+    let days = 0;
+    switch((tx.interval || "").toLowerCase()){
+      case "daily": days = 1; break;
+      case "monthly": days = 30; break;
+      case "yearly": days = 365; break;
+      default: return;
+    }
+
+    while (true) {
+
+      const due = addDays(next, days);
+
+      if (due > today) break;
+
+     
+      state.list.unshift({
+        ...tx,
+        id: crypto.randomUUID(),
+        date: due,
+        recurring:false,
+        interval:"",
+        expiryDate:"None"
+      });
+
+   
+      next = due;
+      tx.count += 1;
+
+     
+      if (tx.expiryDate !== "None" && due >= dateOnly(tx.expiryDate??"")) break;
+    }
+  });
+
+  
+  state.list = state.list.filter(tx =>
+    !tx.recurring || tx.expiryDate === "None" || dateOnly(tx.expiryDate??"") >= today
+  );
+
+  sessionStorage.setItem("transaction", JSON.stringify(state.list));
+}
  }
 })
 export const {addTransaction,deleteTransaction,editTransaction,total,clearTransaction,sortTransaction,manageCounter}=transactions.actions;

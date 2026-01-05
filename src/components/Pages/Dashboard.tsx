@@ -16,18 +16,23 @@ import Navbar from "../Navbar";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useAppSelector } from "../hooks";
+import { manageCounter } from "../slice/transactionSlice";
+import { useDispatch } from "react-redux";
 
 function Dashboard() {
+  const dispatch=useDispatch();
   const { totalItems } = useAppSelector((state) => state.transaction)
   const { Income = 0, Expense = 0, top3Income,top3Expense } = totalItems;
   const navigate = useNavigate();
   const user = sessionStorage.getItem("session_user")
+
   useEffect(() => {
     if (!user) {
       navigate("/login", { replace: true });
     }
 
   }, [user, navigate]);
+    useEffect(()=>{dispatch(manageCounter())},[])
 
   if (!user) {
     return (<h1>User session expires</h1>)

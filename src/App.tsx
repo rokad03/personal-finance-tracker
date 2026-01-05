@@ -10,10 +10,13 @@ import Transaction from './components/Pages/Transaction';
 import ProtectedRoute from './components/ProtectedRoute';
 import { useDispatch } from 'react-redux';
 import { restoreSession } from './components/slice/loginSlice';
+import { manageCounter } from './components/slice/transactionSlice';
 export default function App() {
   const dispatch=useDispatch();
 
   useEffect(()=>{dispatch(restoreSession())},[dispatch])
+  useEffect(()=>{dispatch(manageCounter())},[])
+
   return (
     <>
       <BrowserRouter>

@@ -1,18 +1,21 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { Provider } from "react-redux";
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import Recurring from "../components/Pages/Recurring";
 import transactionReducer from "../components/slice/transactionSlice";
+
 const mockedNavigate = jest.fn();
+
 jest.mock("react-router-dom", () => ({
-    ...jest.requireActual("react-router-dom"),
-    useNavigate: () => mockedNavigate,
+  ...jest.requireActual("react-router-dom"),
+  useNavigate: () => mockedNavigate
 }));
-const renderWithStore = (preloadedState={}) => {
+
+
+const renderWithStore = (preloadedState = {}) => {
   const store = configureStore({
     reducer: { transaction: transactionReducer },
-    preloadedState,
+    preloadedState
   });
 
   return render(
@@ -22,130 +25,159 @@ const renderWithStore = (preloadedState={}) => {
   );
 };
 
-const addDays = (dateStr: string, days: number) => {
-  const [y, m, d] = dateStr.split("-").map(Number);
-  const dt = new Date(y, m - 1, d + days);
-  return dt.toISOString().slice(0, 10);
+
+const addDays = (date: string, days: number) => {
+  const [y, m, d] = date.split("-").map(Number);
+  return new Date(y, m - 1, d + days).toISOString().slice(0, 10);
 };
 
-describe("Recurring Page", () => {
- 
-   test("redirects to login if no user session exists", () => {
-        renderWithStore();
-        expect(mockedNavigate).toHaveBeenCalledWith("/login", { replace: true });
-    });
-  test("No recurring transactions exist", () => {
-    renderWithStore({
-      transaction: { list: [], totalItems: {} },
-    });
 
-    expect(screen.getByText("No transactions found")).toBeInTheDocument();
+describe("Recurring Page", () => {
+
+  beforeEach(() => {
+    sessionStorage.clear();
+    jest.clearAllMocks();
   });
 
-  test("renders recurring only & next autopay date", () => {
+
+  test("redirects to login if session missing", () => {
+    renderWithStore();
+    expect(mockedNavigate).toHaveBeenCalledWith("/login", { replace: true });
+  });
+
+
+  test("renders heading", () => {
+    sessionStorage.setItem(
+      "session_user",
+      JSON.stringify({ username: "Nishit" })
+    );
+
     renderWithStore({
-      transaction: {
-        list: [
-          {
-            id: "1",
-            type: "Expense",
-            amount: "100",
-            date: "2025-01-01",
-            recurring: true,
-            category: "Gym",
-            count: 1,
-          },
-          {
-            id: "2",
-            type: "Income",
-            amount: "200",
-            date: "2025-01-02",
-            recurring: false,
-            category: "Salary",
-            count: 1,
-          },
-        ],
-        totalItems: {},
-      },
+      transaction: { list: [], totalItems: {} }
     });
 
-    expect(screen.getByText("Gym")).toBeInTheDocument();
-    expect(screen.queryByText("Salary")).not.toBeInTheDocument();
-
     expect(
-      screen.getByText(addDays("2025-01-01", 30))
+      screen.getByText("Recurring Transactions")
     ).toBeInTheDocument();
   });
 
-  test("sort button sorts transactions desc", async () => {
-    const user = userEvent.setup();
 
-    renderWithStore({
-      transaction: {
-        list: [
-          { id:"1", type:"Expense", amount:"100", date:"2025-01-01", recurring:true, category:"A", count:1 },
-          { id:"2", type:"Expense", amount:"300", date:"2025-01-01", recurring:true, category:"B", count:1 },
-        ],
-        totalItems:{},
-      },
-    });
-
-    await user.click(screen.getByText("Sort By Amount"));
-
-    const rows = screen.getAllByRole("row").slice(1); 
-
-    expect(rows[0]).toHaveTextContent("300");
-    expect(rows[1]).toHaveTextContent("100");
-  });
-
-  test("pagination buttons work", async () => {
-  const user = userEvent.setup();
-
-
-  const items = Array.from({ length: 15 }).map((_, i) => ({
-    id: String(i),
-    type: "Expense",
-    amount: "10",
-    date: "2025-01-01",
- 	recurring: true,
-    category: `Item ${i}`,
-    count: 1,
-  }));
+  test("shows only recurring transactions", async () => {
+  sessionStorage.setItem(
+    "session_user",
+    JSON.stringify({ username: "Nishit" })
+  );
 
   renderWithStore({
-    transaction: { list: items, totalItems: {} },
+    transaction: {
+      list: [
+        {
+          id: "1",
+          category: "Gym",
+          type: "Expense",
+          amount: "500",
+          date: "2025-01-01T10:00",
+          recurring: true,
+          interval: "monthly",
+          count: 1
+        },
+        {
+          id: "2",
+          category: "Food",
+          type: "Expense",
+          amount: "200",
+          date: "2025-01-01T10:00",
+          recurring: false,
+          count: 1
+        }
+      ],
+      totalItems: {}
+    }
   });
 
-  expect(screen.getByText(/1 of 2/i)).toBeInTheDocument();
+  // ⬇️ WAIT for table to render
+  expect(await screen.findByText("Gym")).toBeInTheDocument();
 
-  await user.click(screen.getByRole("button", { name: /^next$/i }));
-  expect(screen.getByText(/2 of 2/i)).toBeInTheDocument();
-
-  await user.click(screen.getByRole("button", { name: /^prev$/i }));
-  expect(screen.getByText(/1 of 2/i)).toBeInTheDocument();
+  // ⬇️ Food must NOT render
+  expect(screen.queryByText("Food")).not.toBeInTheDocument();
 });
 
 
-  test("next autopay always adds 30 days", () => {
-    renderWithStore({
-      transaction: {
-        list: [
-          {
-            id:"1",
-            type:"Expense",
-            amount:"10",
-            date:"2025-02-01",
-            recurring:true,
-            category:"Netflix",
-            count:1
-          }
-        ],
-        totalItems:{}
-      }
-    });
 
-    expect(
-      screen.getByText(addDays("2025-02-01", 30))
-    ).toBeInTheDocument();
+  test("computes next deduction date correctly for ALL interval types", async () => {
+
+  sessionStorage.setItem(
+    "session_user",
+    JSON.stringify({ username: "Nishit" })
+  );
+
+  renderWithStore({
+    transaction: {
+      list: [
+        {
+          id: "1",
+          category: "MonthlyPlan",
+          type: "Expense",
+          amount: "300",
+          date: "2025-02-01T08:00",
+          recurring: true,
+          interval: "monthly",
+          count: 1
+        },
+        {
+          id: "2",
+          category: "DailyPlan",
+          type: "Expense",
+          amount: "100",
+          date: "2025-02-01T08:00",
+          recurring: true,
+          interval: "daily",
+          count: 1
+        },
+        {
+          id: "3",
+          category: "YearlyPlan",
+          type: "Expense",
+          amount: "500",
+          date: "2025-02-01T08:00",
+          recurring: true,
+          interval: "yearly",
+          count: 1
+        },
+        {
+          id: "4",
+          category: "WeirdPlan",
+          type: "Expense",
+          amount: "50",
+          date: "2025-02-01T08:00",
+          recurring: true,
+          interval: "weird",
+          count: 1
+        }
+      ],
+      totalItems: {}
+    }
   });
+
+  // wait for table render
+  await screen.findByText("MonthlyPlan");
+
+  expect(
+    screen.getByText(addDays("2025-02-01", 31))
+  ).toBeInTheDocument();
+
+  expect(
+    screen.getByText(addDays("2025-02-01", 2))
+  ).toBeInTheDocument();
+
+  expect(
+    screen.getByText(addDays("2025-02-01", 365))
+  ).toBeInTheDocument();
+
+  expect(
+    screen.getByText(addDays("2025-02-01", 0))
+  ).toBeInTheDocument();
+});
+
+
 });

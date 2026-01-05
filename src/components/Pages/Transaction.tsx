@@ -6,7 +6,6 @@ import {
 } from "@mui/material";
 
 
-import TransactionList from "./TransactionList";
 import { useNavigate } from "react-router-dom";
 
 
@@ -36,7 +35,7 @@ export default function Transaction() {
         </Button>
       </Box>
       {display&&<TransactionForm onClose={() => setDisplay(false)}/>}
-      {/* <TransactionList></TransactionList> */}
+     
       <PaginationTable/>
     </>
   );

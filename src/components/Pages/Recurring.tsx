@@ -1,20 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import {
-  Button,
   Paper,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
+
   Typography,
 } from "@mui/material";
 import { useAppDispatch, useAppSelector } from '../hooks';
-import { deleteTransaction, manageCounter, sortTransaction } from '../slice/transactionSlice';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { manageCounter } from '../slice/transactionSlice';
 const paginationModel = { page: 0, pageSize: 5 };
 
 const addDays = (dateStr: string, days: number) => {
@@ -25,11 +18,10 @@ const addDays = (dateStr: string, days: number) => {
 
   const [y, m, d] = datePart.split("-").map(Number);
 
-  // console.log("Same day Date",new Date(y,m-1,d+days));
-  // console.log("Next day Date",new Date(y,m-1,d+2*days))
+
   
   const nextDate = new Date(y, m - 1, d + days);
-  // console.log(nextDate);
+
   const nextDateStr = nextDate.toISOString().slice(0, 10);
   return `${nextDateStr} ${timePart || ""}`;
 };
@@ -44,16 +36,6 @@ function Recurring() {
 
   const recursiveTransactions = transactions.filter((t) => t.recurring === true)
 
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-  const lastIndex = currentPage * itemsPerPage;
-  const firstIndex = lastIndex - itemsPerPage;
-  // console.log(transactions)
-  const pageItems = recursiveTransactions.slice(firstIndex, lastIndex)
-
-  // console.log(pageItems)
-  const totalPages = Math.ceil(recursiveTransactions.length / itemsPerPage)
 
   const user = sessionStorage.getItem("session_user")
   useEffect(() => {
@@ -111,7 +93,9 @@ function Recurring() {
 
   return (
     <>
+    <Typography align="center" variant='h4' sx={{m:6}}>Recurring Transactions</Typography>
       <Paper sx={{ height: 400, width: '90%', margin: '0 auto' }}>
+       
         <DataGrid
           rows={recursiveTransactions}
           columns={columns}
