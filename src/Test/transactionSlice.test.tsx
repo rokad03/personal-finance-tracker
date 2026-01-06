@@ -30,6 +30,7 @@ describe("transaction slice", () => {
 
   const initialState = {
     list: [] as Transaction[],
+    recursiveList: [] as Transaction[],
     totalItems: { tAmount: 0 } as Total,
   };
 

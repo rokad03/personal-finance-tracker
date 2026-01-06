@@ -1,23 +1,30 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, current, PayloadAction } from "@reduxjs/toolkit";
 import { Total, Transaction } from "../../Types/types";
 import { v4 as uuid } from "uuid";
 
 interface TxState {
   list: Transaction[];
+  recursiveList:Transaction[]
   totalItems:Total;
 }
 const dateOnly = (d: string) => d.slice(0, 10);
 
 const addDays = (d: string, n: number) => {
+
   const [y,m,dd] = dateOnly(d).split("-").map(Number);
-  return new Date(y, m-1, dd + n).toISOString().slice(0,10);
+  console.log(y,m,dd);
+  console.log(y,m,dd+n);
+  console.log(new Date(y, m , dd + n).toISOString().slice(0,10))
+  return new Date(y, m-1 , dd + n+1).toISOString().slice(0,10);
 };
 
 
 const saved = sessionStorage.getItem("transaction");
+const resSaved=sessionStorage.getItem("recursive-transaction")
 const savedTotalAmount=sessionStorage.getItem("totalSavedAmount")
 const initialState: TxState = {
   list: saved?JSON.parse(saved):[],
+  recursiveList:  resSaved?JSON.parse(resSaved):[],
   totalItems: savedTotalAmount?JSON.parse(savedTotalAmount):{tAmount:0}
 };
 export const transactions=createSlice({
@@ -50,34 +57,58 @@ export const transactions=createSlice({
     },
    manageCounter:(state)=>{
 
-  const today = new Date().toISOString().slice(0,10);
+  // const today = new Date().toISOString().slice(0,10);
+  const today = new Date().toISOString().slice(0, 16);
+  
+    // console.log("MAnagerCouner")
+  console.log("Recurring Transaction",state.list.filter((rt,i)=>{
+    return rt.recurring===true; 
+  }))
 
-  state.list.forEach(tx => {
+  const rList=state.list.filter((rt,i)=>{
+    return(
+       rt.recurring===true && rt.date<=today
+    )
+  })
+  console.log("rlist is ",rList);
+  
+  
+  rList.forEach(tx => {
 
-    if (!tx.recurring) return;
-
-    let next = dateOnly(tx.date);
-
+    
+    // let next = dateOnly(tx.date);
+    let nextDate=tx.date;
+    // console.log("Next Date",nextDate)
  
-    if ( dateOnly(tx.expiryDate??"") < today) {
-      return;
-    }
+    // if ( dateOnly(tx.expiryDate??"") < today) {
+    //   return;
+    // }
 
-    let days = 0;
-    switch((tx.interval || "").toLowerCase()){
-      case "daily": days = 1; break;
-      case "monthly": days = 30; break;
-      case "yearly": days = 365; break;
-      default: return;
-    }
+    // let days = 0;
+    // switch((tx.interval || "").toLowerCase()){
+    //   case "daily": days = 1; break;
+    //   case "monthly": days = 30; break;
+    //   case "yearly": days = 365; break;
+    //   default: return;
+    // }
 
     // while (true) {
       
-    //   const due = addDays(next, days);
-    //   console.log("Due date",due,"today",today)
+    
+       const due = addDays(nextDate, 1);
+       console.log("Due date",due,dateOnly(today))
+       console.log(due<=today)
 
-    //   if (due > today) break;
+      //  if (due > today) break;
 
+      
+       state.recursiveList.unshift({
+        ...tx,
+        date:due,
+        id:uuid()
+       })
+       console.log(state.recursiveList);
+       tx.date=due;
      
     //   state.list.unshift({
     //     ...tx,
@@ -94,8 +125,8 @@ export const transactions=createSlice({
     //   console.log("Count",tx.count);
      
     //   if (due >= dateOnly(tx.expiryDate??"")) break;
-    // }
-  });
+    //  }
+  }); 
 
   
   state.list = state.list.filter(tx =>

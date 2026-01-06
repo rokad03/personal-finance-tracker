@@ -58,12 +58,12 @@ export interface AuthResponse {
   id: number;
   username: string;
   email: string;
-  token: string;
+  authToken: string;
   refreshToken: string;
 }
 
 
 export interface UserRes extends AuthResponse {
-  accessToken: string;
+  accessToken?: string;
   expiresAt: number;   
 }
