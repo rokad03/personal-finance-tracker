@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Total, Transaction } from "../../Types/types";
-
+import { v4 as uuid } from "uuid";
 
 interface TxState {
   list: Transaction[];
@@ -58,8 +58,8 @@ export const transactions=createSlice({
 
     let next = dateOnly(tx.date);
 
-    // stop if expired
-    if (tx.expiryDate !== "None" && dateOnly(tx.expiryDate??"") < today) {
+ 
+    if ( dateOnly(tx.expiryDate??"") < today) {
       return;
     }
 
@@ -71,29 +71,30 @@ export const transactions=createSlice({
       default: return;
     }
 
-    while (true) {
+    // while (true) {
+      
+    //   const due = addDays(next, days);
+    //   console.log("Due date",due,"today",today)
 
-      const due = addDays(next, days);
-
-      if (due > today) break;
+    //   if (due > today) break;
 
      
-      state.list.unshift({
-        ...tx,
-        id: crypto.randomUUID(),
-        date: due,
-        recurring:false,
-        interval:"",
-        expiryDate:"None"
-      });
+    //   state.list.unshift({
+    //     ...tx,
+    //     // id: uuid(),
+    //     date: due,
+    //     // recurring:false,
+    //     // interval:"",
+    //     // expiryDate:"None"
+    //   });
 
    
-      next = due;
-      tx.count += 1;
-
+    //   next = due;
+    //   tx.count += 1;
+    //   console.log("Count",tx.count);
      
-      if (tx.expiryDate !== "None" && due >= dateOnly(tx.expiryDate??"")) break;
-    }
+    //   if (due >= dateOnly(tx.expiryDate??"")) break;
+    // }
   });
 
   

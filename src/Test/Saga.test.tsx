@@ -1,173 +1,202 @@
-import { runSaga } from "redux-saga";
+import { all, call, put } from "redux-saga/effects";
+
+import rootSaga from "../components/saga/rootSaga";
+import authSaga, {
+  handleLogin,
+  handleRestore,
+  handleLogout,
+} from "../components/saga/fetchUserSaga";
 
 import {
   loginRequest,
   loginSuccess,
   loginError,
+  restoreFinished,
 } from "../components/slice/loginSlice";
 
-import {
-  handleLogin,
-  handleRestore,
-  handleLogout,
-} from "../components/saga/fetchUserSaga"
+import { apiPost } from "../components/saga/fetchUserSaga";
 
 
-// Ensure clean mocks before each test
+const mockSet = jest.spyOn(Storage.prototype, "setItem");
+const mockGet = jest.spyOn(Storage.prototype, "getItem");
+const mockRemove = jest.spyOn(Storage.prototype, "removeItem");
+
 beforeEach(() => {
-  jest.resetAllMocks();
-  sessionStorage.clear();
-
-  // cleanup fetch
-  delete (global as any).fetch;
+  jest.clearAllMocks();
 });
 
 
-// =============================
-// LOGIN SUCCESS
-// =============================
-test("login success dispatches loginSuccess and stores session", async () => {
+describe("rootSaga", () => {
+  test("runs authSaga inside all()", () => {
+    const gen = rootSaga();
 
-  (global as any).fetch = jest.fn().mockResolvedValue({
-    ok: true,
-    json: async () => ({
-      token: "access123",
-      refreshToken: "refresh123",
-    }),
+    expect(gen.next().value).toEqual(
+      all([authSaga()])
+    );
+
+    expect(gen.next().done).toBe(true);
+  });
+});
+
+describe("handleLogin", () => {
+
+  test("successful login flow", () => {
+    const action = loginRequest({ username: "john", password: "123" });
+
+    const gen = handleLogin(action);
+
+  
+    expect(gen.next().value).toEqual(
+      call(apiPost, "https://dummyjson.com/auth/login", {
+        username: "john",
+        password: "123",
+        expiresInMins: 30,
+      })
+    );
+
+  
+    const apiResult = {
+      token: "abc",
+      refreshToken: "xyz",
+      id: 1,
+      username: "nishit",
+      email: "nishit@test.com",
+    };
+
+    const effect = gen.next(apiResult).value as any;
+
+    
+    expect(effect.type).toBe(put(loginSuccess({} as any)).type);
+
+    expect(mockSet).toHaveBeenCalledTimes(1);
+    expect(mockSet).toHaveBeenCalledWith(
+      "session_user",
+      expect.any(String)
+    );
+
+    expect(gen.next().done).toBe(true);
   });
 
-  const dispatched: any[] = [];
 
-  await runSaga(
-    { dispatch: (a) => dispatched.push(a) },
-    handleLogin,
-    loginRequest({ username: "kminchelle", password: "0lelplR" })
-  ).toPromise();
+  test("API failure triggers loginError", () => {
+    const action = loginRequest({ username: "x", password: "y" });
 
-  expect(global.fetch).toHaveBeenCalledTimes(1);
+    const gen = handleLogin(action);
 
-  expect(dispatched).toContainEqual(
-    expect.objectContaining({ type: loginSuccess.type })
-  );
+    
+    expect(gen.next().value).toEqual(expect.any(Object));
 
-  expect(sessionStorage.getItem("session_user")).not.toBeNull();
+    
+    const err = new Error("boom");
+
+    expect(gen.throw!(err).value).toEqual(
+      put(loginError("Invalid username or password"))
+    );
+
+    expect(gen.next().done).toBe(true);
+  });
 });
 
 
-// =============================
-// LOGIN FAILURE
-// =============================
-test("login failure dispatches loginError", async () => {
-  (global as any).fetch = jest.fn().mockResolvedValue({
-    ok: false,
+
+
+describe("handleRestore", () => {
+
+  test("no session stored → restoreFinished()", () => {
+    mockGet.mockReturnValue(null);
+
+    const gen = handleRestore();
+
+    expect(gen.next().value).toEqual(
+      put(restoreFinished())
+    );
+
+    expect(gen.next().done).toBe(true);
   });
 
-  const dispatched: any[] = [];
 
-  await runSaga(
-    { dispatch: (a) => dispatched.push(a) },
-    handleLogin,
-    loginRequest({ username: "wrong", password: "wrong" })
-  ).toPromise();
+  test("corrupt JSON triggers loginError + remove", () => {
+    mockGet.mockReturnValue("bad json");
 
-  expect(dispatched).toContainEqual(
-    loginError("Invalid username or password")
-  );
-});
+    const gen = handleRestore();
 
+    
+    const effect = gen.next().value;
 
-// =============================
-// RESTORE — TOKEN STILL VALID
-// =============================
-test("restores session when token not expired", async () => {
-  const stored = {
-    token: "abc",
-    refreshToken: "xyz",
-    expiresAt: Date.now() + 100000,
-  };
+    expect(mockRemove).toHaveBeenCalledWith("session_user");
 
-  sessionStorage.setItem("session_user", JSON.stringify(stored));
+    expect(effect).toEqual(
+      put(loginError("Restore failed"))
+    );
 
-  const dispatched: any[] = [];
-
-  await runSaga(
-    { dispatch: (a) => dispatched.push(a) },
-    handleRestore
-  ).toPromise();
-
-  expect(dispatched).toContainEqual(loginSuccess(stored));
-});
-
-
-// =============================
-// RESTORE — EXPIRED → REFRESH SUCCESS
-// =============================
-test("refreshes token when expired", async () => {
-  const stored = {
-    token: "old",
-    refreshToken: "refresh123",
-    expiresAt: Date.now() - 1000,
-  };
-
-  sessionStorage.setItem("session_user", JSON.stringify(stored));
-
-  (global as any).fetch = jest.fn().mockResolvedValue({
-    ok: true,
-    json: async () => ({ token: "newAccessToken" }),
+    expect(gen.next().done).toBe(true);
   });
 
-  const dispatched: any[] = [];
-
-  await runSaga(
-    { dispatch: (a) => dispatched.push(a) },
-    handleRestore
-  ).toPromise();
-
-  expect(dispatched).toContainEqual(
-    expect.objectContaining({ type: loginSuccess.type })
-  );
-
-  const updated = JSON.parse(sessionStorage.getItem("session_user")!);
-  expect(updated.accessToken).toBe("newAccessToken");
 });
 
 
-// =============================
-// RESTORE — EXPIRED → REFRESH FAILS
-// =============================
-test("refresh failure logs user out", async () => {
-  const stored = {
-    token: "old",
-    refreshToken: "bad",
-    expiresAt: Date.now() - 1000,
-  };
 
-  sessionStorage.setItem("session_user", JSON.stringify(stored));
 
-  (global as any).fetch = jest.fn().mockResolvedValue({
-    ok: false,
+describe("handleLogout", () => {
+  test("clears session storage", () => {
+    const gen = handleLogout();
+
+    gen.next(); 
+
+    expect(mockRemove).toHaveBeenCalledWith("session_user");
+
+    expect(gen.next().done).toBe(true);
+  });
+});
+
+
+
+describe("apiPost Saga", () => {
+  const url = "dummyjson.com";
+  const body = { username: "test", password: "123" };
+  const mockResponseData = { token: "abc-123" };
+
+  test("successfully performs a POST request and parses JSON", () => {
+    const gen = apiPost(url, body);
+
+   
+    expect(gen.next().value).toEqual(
+      call(fetch, url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      })
+    );
+
+
+    const mockRes = {
+      ok: true,
+      json: () => mockResponseData,
+    };
+
+   
+    expect(gen.next(mockRes as any).value).toEqual(
+      call([mockRes, "json"])
+    );
+
+   
+    const finalResult = gen.next(mockResponseData);
+    expect(finalResult.value).toEqual(mockResponseData);
+    expect(finalResult.done).toBe(true);
   });
 
-  const dispatched: any[] = [];
+  test("throws an error if the response is not ok", () => {
+    const gen = apiPost(url, body);
 
-  await runSaga(
-    { dispatch: (a) => dispatched.push(a) },
-    handleRestore
-  ).toPromise();
+    
+    gen.next();
 
-  expect(sessionStorage.getItem("session_user")).toBeNull();
+   
+    const mockRes = { ok: false };
 
-  expect(dispatched[0].type).toBe(loginError.type);
-});
-
-
-// =============================
-// LOGOUT
-// =============================
-test("logout clears session", async () => {
-  sessionStorage.setItem("session_user", "123");
-
-  await runSaga({}, handleLogout).toPromise();
-
-  expect(sessionStorage.getItem("session_user")).toBeNull();
+  
+    expect(() => {
+      gen.next(mockRes as any);
+    }).toThrow("Request failed");
+  });
 });

@@ -8,9 +8,10 @@ import reducer, {
   manageCounter,
 } from "../components/slice/transactionSlice";
 import { Total, Transaction } from "../Types/types";
-(global as any).crypto = {
-  randomUUID: jest.fn(() => "mock-id-123"),
-};
+jest.mock("uuid", () => ({
+  v4: () => "static-id-123"
+}));
+
 describe("transaction slice", () => {
   let setSpy: jest.SpyInstance;
   let removeSpy: jest.SpyInstance;
@@ -19,7 +20,7 @@ describe("transaction slice", () => {
     jest.spyOn(Storage.prototype, "getItem").mockReturnValue(null);
     setSpy = jest.spyOn(Storage.prototype, "setItem");
     removeSpy = jest.spyOn(Storage.prototype, "removeItem");
-    jest.useFakeTimers(); 
+    jest.useFakeTimers();
   });
 
   afterEach(() => {
@@ -29,7 +30,7 @@ describe("transaction slice", () => {
 
   const initialState = {
     list: [] as Transaction[],
-    totalItems: { tAmount: 0 } as any,
+    totalItems: { tAmount: 0 } as Total,
   };
 
   const tx: Transaction = {
@@ -52,7 +53,7 @@ describe("transaction slice", () => {
     expect(state.list.length).toBe(1);
     expect(state.list[0]).toEqual(tx);
 
-    expect(setSpy).toHaveBeenCalled(); 
+    expect(setSpy).toHaveBeenCalled();
   });
 
   test("editTransaction", () => {
@@ -81,7 +82,7 @@ describe("transaction slice", () => {
       Income: 200,
       Expense: 100,
       top3Expense: [],
-      top3Income:[]
+      top3Income: []
     };
 
     const state = reducer(initialState, total(totals));
@@ -115,29 +116,53 @@ describe("transaction slice", () => {
     expect(removeSpy).toHaveBeenCalledWith("transaction");
   });
 
+
+
+  test.only("managerCounter increment when recurring + 1 days pass",()=>{
+     jest.setSystemTime(new Date("2026-01-03"));
+     const recurringTx = {
+      id: "1",
+      type: "Expense",
+      amount: "50",
+      date: "2026-01-01",
+      recurring: true,
+      count: 1,
+      category: "Netflix",
+      expiryDate: "2027-01-05",
+      interval: "Daily"
+    };
+    const state = reducer(
+      { ...initialState, list: [recurringTx] as Transaction[] },
+      manageCounter()
+    );
+
+    expect(state.list[0].recurring).toBe(true);
+    expect(state.list[0].count).toBe(2);
+  })
+
   test("manageCounter increments when recurring + 30 days passed", () => {
-   
-    jest.setSystemTime(new Date("2025-02-01"));
+
+    jest.setSystemTime(new Date("2026-02-01"));
 
     const recurringTx = {
-    id: "1",
-    type: "Expense",
-    amount: "50",
-    date: "2025-01-01",
-    recurring: true,
-    count: 1,
-    category: "Netflix",
-    expiryDate: "None",
-    interval: "monthly"   
-  };
+      id: "1",
+      type: "Expense",
+      amount: "50",
+      date: "2026-01-01T10:00",
+      recurring: true,
+      count: 1,
+      category: "Netflix",
+      expiryDate: "2027-01-01T10:00",
+      interval: "Monthly"
+    };
 
     const state = reducer(
-      { ...initialState, list: [recurringTx] as any },
+      { ...initialState, list: [recurringTx] as Transaction[] },
       manageCounter()
     );
 
     expect(state.list[0].recurring).toBe(false);
-    expect(state.list[1].count).toBe(2); 
+    expect(state.list[1].count).toBe(2);
   });
 
   test("manageCounter does NOT increment when not due", () => {
@@ -151,12 +176,12 @@ describe("transaction slice", () => {
       recurring: true,
       count: 1,
       category: "Netflix",
-      expiryDate: "None",     
-    interval: "monthly"     
+      expiryDate: "None",
+      interval: "monthly"
     };
 
     const state = reducer(
-      { ...initialState, list: [tx] as any },
+      { ...initialState, list: [tx] as Transaction[] },
       manageCounter()
     );
 
@@ -175,7 +200,7 @@ describe("transaction slice", () => {
     expect(state.list[0].count).toBe(5);
   });
 
-    test("manageCounter ignores non-recurring transactions", () => {
+  test("manageCounter ignores non-recurring transactions", () => {
 
     const tx = {
       id: "1",
@@ -190,12 +215,12 @@ describe("transaction slice", () => {
     };
 
     const result = reducer(
-      { ...initialState, list: [tx] as any },
+      { ...initialState, list: [tx] as Transaction[] },
       manageCounter()
     );
 
-    expect(result.list[0].count).toBe(5);   
-    expect(result.list.length).toBe(1);     
+    expect(result.list[0].count).toBe(5);
+    expect(result.list.length).toBe(1);
   });
 
 });

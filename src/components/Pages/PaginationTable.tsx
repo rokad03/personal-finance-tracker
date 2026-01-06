@@ -6,13 +6,14 @@ import { Box, Button, Stack } from "@mui/material";
 import { deleteTransaction, total } from "../slice/transactionSlice";
 
 import TransactionForm from "./TransactionForm";
+import { Transaction } from "../../Types/types";
 
 const paginationModel = { page: 0, pageSize: 5 };
 
 function PaginationTable() {
   const dispatch = useAppDispatch();
   const transactions = useAppSelector((state) => state.transaction.list);
-  const [selectedId, setSelectedId] = useState<null | any>(null);
+  const [selectedTrans, setSelectedTrans] = useState<null | Transaction>(null);
   const columns: GridColDef[] = [
     { field: "id", headerName: "ID", flex: 0.5, sortable: false },
     { field: "date", headerName: "Date", flex: 1 },
@@ -36,7 +37,7 @@ function PaginationTable() {
               size="small"
               onClick={() => {
                 console.log(`Editing: ${tx}`);
-                setSelectedId(tx);
+                setSelectedTrans(tx);
               }}
             >
               Edit
@@ -55,21 +56,12 @@ function PaginationTable() {
   ];
   const now = new Date();
 
-// const effectiveTransactions = transactions.filter(t => {
-//   if (!t.date) return false;
 
-//   const [date, time = "00:00"] = t.date.split("T");
-//   const [y, m, d] = date.split("-").map(Number);
-//   const [hh, mm] = time.split(":").map(Number);
-
-//   const tx = new Date(y, m - 1, d, hh, mm);   
-
-//   return tx.getTime() <= now.getTime();
-// });
 const effectiveTransactions = transactions.filter(t => {
   if (!t.date) return false;
   return new Date(t.date).getTime() <= now.getTime();
 });
+
   const tAmount = effectiveTransactions.reduce(
     (sum, t) => sum + Number(t.amount),
     0
@@ -130,8 +122,8 @@ const effectiveTransactions = transactions.filter(t => {
         />
       </Paper>
       </Box>
-      {selectedId && (
-        <TransactionForm tx={selectedId} onClose={() => setSelectedId(null)} />
+      {selectedTrans && (
+        <TransactionForm tx={selectedTrans} onClose={() => setSelectedTrans(null)} />
       )}
     </>
   );

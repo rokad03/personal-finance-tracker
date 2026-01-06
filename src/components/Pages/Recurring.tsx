@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import {
   Paper,
-
   Typography,
 } from "@mui/material";
 import { useAppDispatch, useAppSelector } from '../hooks';
@@ -74,7 +73,7 @@ function Recurring() {
         const date = row.date;
         const interval = row.interval;
 
-        if (!date || !interval) return "N/A";
+        // if (!date || !interval) return "N/A";
 
         let daysToAdd = 0;
         switch (interval.toLowerCase()) {

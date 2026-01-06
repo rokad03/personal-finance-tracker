@@ -43,7 +43,7 @@ export type Transaction = {
   expiryDate?:string
   interval?:string
 };
-type CategoryListing={
+export type CategoryListing={
     category:string;
     amount:number
 }
@@ -53,4 +53,17 @@ export type Total={
   Expense:number;
   top3Expense:CategoryListing[]
   top3Income:CategoryListing[]
+}
+export interface AuthResponse {
+  id: number;
+  username: string;
+  email: string;
+  token: string;
+  refreshToken: string;
+}
+
+
+export interface UserRes extends AuthResponse {
+  accessToken: string;
+  expiresAt: number;   
 }

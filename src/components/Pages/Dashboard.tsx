@@ -18,6 +18,7 @@ import { useEffect } from "react";
 import { useAppSelector } from "../hooks";
 import { manageCounter } from "../slice/transactionSlice";
 import { useDispatch } from "react-redux";
+import { CategoryListing } from "../../Types/types";
 
 function Dashboard() {
   const dispatch=useDispatch();
@@ -32,7 +33,7 @@ function Dashboard() {
     }
 
   }, [user, navigate]);
-    useEffect(()=>{dispatch(manageCounter())},[])
+    useEffect(()=>{dispatch(manageCounter())},[dispatch])
 
   if (!user) {
     return (<h1>User session expires</h1>)
@@ -103,7 +104,7 @@ function Dashboard() {
                       <TableCell colSpan={2} align="center" sx={{ py: 3 }}>No Stats found</TableCell>
                     </TableRow>
                   ) : (
-                    top3Expense.map((tx: any, i: number) => (
+                    top3Expense.map((tx:CategoryListing, i: number) => (
                       <TableRow key={`exp-${i}`} hover>
                         <TableCell>{tx.category}</TableCell>
                         <TableCell align="right">{tx.amount}</TableCell>
@@ -134,7 +135,7 @@ function Dashboard() {
                       <TableCell colSpan={2} align="center" sx={{ py: 3 }}>No Stats found</TableCell>
                     </TableRow>
                   ) : (
-                    top3Income.map((tx: any, i: number) => (
+                    top3Income.map((tx: CategoryListing, i: number) => (
                       <TableRow key={`inc-${i}`} hover>
                         <TableCell>{tx.category}</TableCell>
                         <TableCell align="right">{tx.amount}</TableCell>

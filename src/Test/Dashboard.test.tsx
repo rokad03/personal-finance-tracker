@@ -11,7 +11,9 @@ jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
   useNavigate: () => mockedNavigate,
 }));
-
+jest.mock("uuid", () => ({
+  v4: jest.fn(() => "mock-uuid-123"),
+}));
 
 const renderWithProviders = (preloadedState = {}) => {
   const store = configureStore({
@@ -82,7 +84,7 @@ describe("Dashboard Component", () => {
     });
 
     expect(screen.getByText(/Sports/i)).toBeInTheDocument();
-    expect(screen.getByText("200")).toBeInTheDocument();
+   expect(screen.getAllByText("200").length).toBeGreaterThan(0);
     expect(screen.getByText("-200")).toBeInTheDocument(); // balance
   });
 

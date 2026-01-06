@@ -11,6 +11,9 @@ jest.mock("react-router-dom", () => ({
   useNavigate: () => mockedNavigate
 }));
 
+jest.mock("uuid", () => ({
+  v4: () => "static-id-123"
+}));
 
 const renderWithStore = (preloadedState = {}) => {
   const store = configureStore({
@@ -76,9 +79,10 @@ describe("Recurring Page", () => {
           category: "Gym",
           type: "Expense",
           amount: "500",
-          date: "2025-01-01T10:00",
+          date: "2026-01-01T10:00",
           recurring: true,
-          interval: "monthly",
+          interval: "Monthly",
+          expiryDate:"2026-01-20T10:00",
           count: 1
         },
         {
@@ -88,17 +92,19 @@ describe("Recurring Page", () => {
           amount: "200",
           date: "2025-01-01T10:00",
           recurring: false,
-          count: 1
         }
       ],
       totalItems: {}
     }
   });
 
-  // ⬇️ WAIT for table to render
-  expect(await screen.findByText("Gym")).toBeInTheDocument();
+ 
+  expect(
+  await screen.findByText("Gym")
+).toBeInTheDocument();
 
-  // ⬇️ Food must NOT render
+
+  
   expect(screen.queryByText("Food")).not.toBeInTheDocument();
 });
 
@@ -121,7 +127,8 @@ describe("Recurring Page", () => {
           amount: "300",
           date: "2025-02-01T08:00",
           recurring: true,
-          interval: "monthly",
+          interval: "Monthly",
+          expiryDate:"2026-01-20T10:00",
           count: 1
         },
         {
@@ -131,7 +138,8 @@ describe("Recurring Page", () => {
           amount: "100",
           date: "2025-02-01T08:00",
           recurring: true,
-          interval: "daily",
+          interval: "Daily",
+          expiryDate:"2026-01-20T10:00",
           count: 1
         },
         {
@@ -141,7 +149,8 @@ describe("Recurring Page", () => {
           amount: "500",
           date: "2025-02-01T08:00",
           recurring: true,
-          interval: "yearly",
+          interval: "Yearly",
+          expiryDate:"2026-01-20T10:00",
           count: 1
         },
         {
@@ -152,6 +161,7 @@ describe("Recurring Page", () => {
           date: "2025-02-01T08:00",
           recurring: true,
           interval: "weird",
+          expiryDate:"2026-01-20T10:00",
           count: 1
         }
       ],
@@ -159,23 +169,30 @@ describe("Recurring Page", () => {
     }
   });
 
-  // wait for table render
+  
   await screen.findByText("MonthlyPlan");
+   expect(
+    await screen.findByText(/2025-03-03/))
+  .toBeInTheDocument();
 
+  const dateString = addDays("2025-02-01", 31); 
   expect(
-    screen.getByText(addDays("2025-02-01", 31))
+    await screen.findByText(new RegExp(dateString,"i"))
   ).toBeInTheDocument();
 
+  const DailyDateString=addDays("2025-02-01", 2)
   expect(
-    screen.getByText(addDays("2025-02-01", 2))
+    await screen.findByText(new RegExp(DailyDateString,"i"))
   ).toBeInTheDocument();
 
+  const yearlyDateString=addDays("2025-02-01",365)
   expect(
-    screen.getByText(addDays("2025-02-01", 365))
+    await screen.findByText(new RegExp(yearlyDateString,"i"))
   ).toBeInTheDocument();
 
+  const wieredDateString=addDays("2025-02-01", 0)
   expect(
-    screen.getByText(addDays("2025-02-01", 0))
+    await screen.findByText(new RegExp(wieredDateString,"i"))
   ).toBeInTheDocument();
 });
 

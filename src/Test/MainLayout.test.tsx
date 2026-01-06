@@ -3,7 +3,9 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import MainLayout from '../components/MainLayout';
 import { store } from '../components/store/store';
 import { Provider } from 'react-redux';
-
+jest.mock("uuid", () => ({
+  v4: jest.fn(() => "mock-uuid-123"),
+}));
 describe('MainLayout', () => {
   test('renders Navbar and nested route content', () => {
     render(

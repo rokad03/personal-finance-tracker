@@ -9,9 +9,10 @@ import {
   restoreFinished,
   logout,
 } from "../slice/loginSlice";
+import { AuthResponse, UserRes } from "../../Types/types";
 
 
-function* apiPost(url: string, body: any): SagaIterator {
+export function* apiPost<T>(url: string, body: unknown): SagaIterator<T> {
   const res: Response = yield call(fetch, url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -20,65 +21,73 @@ function* apiPost(url: string, body: any): SagaIterator {
 
   if (!res.ok) throw new Error("Request failed");
 
-  return yield call([res, "json"]);   // res.json()
+  const data: T = yield call([res, "json"]); // res.json()
+  return data;
 }
 
 
 
-export function* handleLogin(action: ReturnType<typeof loginRequest>): SagaIterator {
+export function* handleLogin(action: ReturnType<typeof loginRequest>
+): SagaIterator {
   const { username, password } = action.payload;
 
   try {
-    const data: any = yield call(apiPost,
+    const data: AuthResponse = yield call(
+      apiPost<AuthResponse>,
       "https://dummyjson.com/auth/login",
       { username, password, expiresInMins: 30 }
     );
+    console.log(data);
 
-    const expiresAt = Date.now() + 1000 * 60 * 30;
+    const expiresAt = Date.now() + 1000 * 60 * 30; // 30 mins
 
-    const user = {
+    const user: UserRes = {
       ...data,
       accessToken: data.token,
-      refreshToken: data.refreshToken,
       expiresAt,
     };
 
     sessionStorage.setItem("session_user", JSON.stringify(user));
 
     yield put(loginSuccess(user));
-  } catch (err) {
+  } catch {
     yield put(loginError("Invalid username or password"));
   }
 }
 
-
-
-
 export function* handleRestore(): SagaIterator {
   try {
-    const str = sessionStorage.getItem("session_user");
+    const stored = sessionStorage.getItem("session_user");
 
-    if (!str) {
+    if (!stored) {
       yield put(restoreFinished());
       return;
     }
 
-    let user = JSON.parse(str);
+    let user: UserRes = JSON.parse(stored);
 
+   
     if (Date.now() < user.expiresAt) {
       yield put(loginSuccess(user));
       return;
     }
 
-
+    //using refresh token
     try {
-      const refresh: any = yield call(apiPost,
+      const refresh: AuthResponse = yield call(
+        apiPost<AuthResponse>,
         "https://dummyjson.com/auth/refresh",
-        { refreshToken: user.refreshToken, expiresInMins: 30 }
+        {
+          refreshToken: user.refreshToken,
+          expiresInMins: 30,
+        }
       );
 
-      user.accessToken = refresh.token;
-      user.expiresAt = Date.now() + 1000 * 60 * 30;
+      user = {
+        ...user,
+        accessToken: refresh.token,
+        expiresAt: Date.now() + 1000 * 60 * 30,
+      };
 
       sessionStorage.setItem("session_user", JSON.stringify(user));
 
@@ -95,10 +104,10 @@ export function* handleRestore(): SagaIterator {
 
 
 
-
 export function* handleLogout() {
   sessionStorage.removeItem("session_user");
 }
+
 
 
 

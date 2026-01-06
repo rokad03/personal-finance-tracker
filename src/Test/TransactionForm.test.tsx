@@ -22,7 +22,7 @@ const renderWithProviders = (ui: React.ReactNode, preloadedState = {}) => {
   render(
     <Provider store={store}>
       <MemoryRouter>
-        <TransactionForm onClose={()=>{}}/>
+        {ui}
       </MemoryRouter>
     </Provider>
   );
@@ -52,30 +52,33 @@ describe("TransactionForm", () => {
   });
 
   test("recurring requires interval & expiry", async () => {
-    const user = userEvent.setup();
+  const user = userEvent.setup();
 
-    renderWithProviders(<TransactionForm onClose={jest.fn()} />);
+  renderWithProviders(<TransactionForm onClose={jest.fn()} />);
 
-    await user.type(screen.getByTestId("amount"), "100");
-    await user.type(screen.getByTestId("Category"), "Food");
+  await user.type(screen.getByTestId("amount"), "100");
+  await user.type(screen.getByTestId("Category"), "Food");
 
-    await user.click(screen.getByRole("combobox", { name: /type/i }));
-    await user.click(screen.getByRole("option", { name: /income/i }));
+  await user.click(screen.getByRole("combobox", { name: /type/i }));
+  await user.click(screen.getByRole("option", { name: /income/i }));
 
-    await user.type(screen.getByTestId("date"), "2026-01-01T10:00");
+  await user.type(screen.getByTestId("date"), "2026-01-01T10:00");
 
-    await user.click(screen.getByLabelText(/mark as recurring/i));
+  await user.click(screen.getByLabelText(/mark as recurring/i));
 
-    const submit = screen.getByRole("button", { name: /add/i });
-    expect(submit).toBeDisabled();
+  const submit = screen.getByRole("button", { name: /add/i });
+  expect(submit).toBeDisabled();
 
-    await user.click(screen.getByRole("combobox", { name: /^type$/i }));
-    await user.click(screen.getByRole("option", { name: /monthly/i }));
+  // <-- FIX HERE
+  const selects = screen.getAllByRole("combobox");
+  await user.click(selects[1]);
+  await user.click(screen.getByRole("option", { name: /monthly/i }));
 
-    await user.type(screen.getByTestId("expiryDate"), "2026-12-01T00:00");
+  await user.type(screen.getByTestId("expiryDate"), "2026-12-01T00:00");
 
-    expect(submit).toBeEnabled();
-  });
+  expect(submit).toBeEnabled();
+});
+
 
   test("blocks expense when balance too low", async () => {
     const user = userEvent.setup();
@@ -101,30 +104,30 @@ describe("TransactionForm", () => {
   });
 
   test("dispatches addTransaction for new entry", async () => {
-    const user = userEvent.setup();
-    const onClose = jest.fn();
+  const user = userEvent.setup();
+  const onClose = jest.fn();
 
-    const { dispatchSpy } = renderWithProviders(
-      <TransactionForm onClose={onClose} />,
-      { transaction: { list: [], totalItems: { Income: 1000, Expense: 0 } } }
-    );
+  const { dispatchSpy } = renderWithProviders(
+    <TransactionForm onClose={onClose} />,
+    { transaction: { list: [], totalItems: { Income: 1000, Expense: 0 } } }
+  );
 
-    await user.type(screen.getByTestId("amount"), "200");
-    await user.type(screen.getByTestId("Category"), "Food");
+  await user.type(screen.getByTestId("amount"), "200");
+  await user.type(screen.getByTestId("Category"), "Food");
 
-    await user.click(screen.getByRole("combobox", { name: /type/i }));
-    await user.click(screen.getByRole("option", { name: /expense/i }));
+  await user.click(screen.getByRole("combobox", { name: /type/i }));
+  await user.click(screen.getByRole("option", { name: /expense/i }));
 
-    await user.type(screen.getByTestId("date"), "2026-01-01T10:00");
+  await user.type(screen.getByTestId("date"), "2026-01-01T10:00");
 
-    await user.click(screen.getByRole("button", { name: /add/i }));
+  await user.click(screen.getByRole("button", { name: /add/i }));
 
-    expect(dispatchSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ type: addTransaction.type })
-    );
+  expect(dispatchSpy).toHaveBeenCalledWith(
+    expect.objectContaining({ type: addTransaction.type })
+  );
 
-    expect(onClose).toHaveBeenCalled();
-  });
+  expect(onClose).toHaveBeenCalled();
+});
 
   test("dispatches editTransaction when tx exists", async () => {
     const user = userEvent.setup();

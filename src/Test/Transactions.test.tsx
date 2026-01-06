@@ -14,7 +14,8 @@ jest.mock("react-router-dom", () => ({
   useNavigate: () => mockedNavigate
 }));
 
-
+const mockGet = jest.spyOn(Storage.prototype, "getItem");
+const mockSet = jest.spyOn(Storage.prototype, "setItem");
 
 jest.mock("uuid", () => ({
   v4: () => "static-uuid-123"
@@ -46,13 +47,17 @@ const renderWithProviders = (preloadedState = {}) => {
 describe("Transaction Page", () => {
 
   beforeEach(() => {
-    sessionStorage.setItem(
-      "session_user",
-      JSON.stringify({ username: "Nishit" })
-    );
+     mockGet.mockReturnValue(JSON.stringify({ username: "Nishit" }));
     jest.clearAllMocks();
   });
 
+
+  test("redirects to login if no user session exists", () => {
+    mockGet.mockReturnValue(null);
+    renderWithProviders();
+
+    expect(mockedNavigate).toHaveBeenCalledWith("/login", { replace: true });
+  });
 
   test("renders Add button but form hidden initially", () => {
     renderWithProviders();

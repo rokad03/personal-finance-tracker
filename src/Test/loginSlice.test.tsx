@@ -17,7 +17,7 @@ describe("login slice", () => {
   };
 
   test("returns initial state", () => {
-    expect(reducer(undefined, { type: "UNKNOWN" } as any)).toEqual({
+    expect(reducer(undefined, { type: "UNKNOWN" })).toEqual({
       loading: false,
       users: null,
       restoring: true,
@@ -93,9 +93,10 @@ describe("login slice", () => {
     );
 
     expect(state).toEqual({
-      loading: false,
+      error: "",
       users: null,
       restoring: false,
+      loading:false
     });
   });
 });
