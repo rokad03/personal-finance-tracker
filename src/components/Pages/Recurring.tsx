@@ -16,8 +16,6 @@ const addDays = (dateStr: string, days: number) => {
   const [datePart, timePart] = dateStr.split("T");
 
   const [y, m, d] = datePart.split("-").map(Number);
-
-
   
   const nextDate = new Date(y, m - 1, d + days);
 
@@ -34,7 +32,18 @@ function Recurring() {
   const transactions = useAppSelector((state) => state.transaction.list);
 
   const recursiveTransactions = transactions.filter((t) => t.recurring === true)
-
+  const TodaysTransaction = recursiveTransactions.filter((t) => {
+ 
+    const todayFormatted = new Date().toISOString().slice(0, 16);
+    
+    
+    const storedDateFormatted = t.date.slice(0, 16);
+    
+    console.log("Comparing:", storedDateFormatted, "with", todayFormatted);
+    
+    
+    return storedDateFormatted <= todayFormatted;
+});
 
   const user = sessionStorage.getItem("session_user")
   useEffect(() => {
@@ -82,7 +91,6 @@ function Recurring() {
           case 'yearly': daysToAdd = 365; break;
           default: daysToAdd = 0;
         }
-
         return addDays(date, daysToAdd);
       },
     },
@@ -96,7 +104,7 @@ function Recurring() {
       <Paper sx={{ height: 400, width: '90%', margin: '0 auto' }}>
        
         <DataGrid
-          rows={recursiveTransactions}
+          rows={TodaysTransaction}
           columns={columns}
           initialState={{ pagination: { paginationModel } }}
           pageSizeOptions={[5, 10]}
