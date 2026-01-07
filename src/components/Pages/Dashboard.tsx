@@ -23,21 +23,30 @@ import { CategoryListing } from "../../Types/types";
 function Dashboard() {
   const dispatch=useDispatch();
   const { totalItems } = useAppSelector((state) => state.transaction)
+  const { list, recursiveList } = useAppSelector((s) => s.transaction);
+
+const transactions = [...list, ...recursiveList];
+
   const { Income = 0, Expense = 0, top3Income,top3Expense } = totalItems;
   const navigate = useNavigate();
   const user = sessionStorage.getItem("session_user")
 
   useEffect(() => {
-    if (!user) {
+    if (!user) {  
       navigate("/login", { replace: true });
     }
 
   }, [user, navigate]);
-    useEffect(()=>{dispatch(manageCounter())},[dispatch])
+    useEffect(()=>{dispatch(manageCounter());
+       const id = setInterval(() => {
+    dispatch(manageCounter());
+  }, 60 * 1000); // 1 min
 
-  if (!user) {
-    return (<h1>User session expires</h1>)
-  }
+  return () => clearInterval(id);},[dispatch])
+
+  // if (!user) {
+  //   return (<h1>User session expires</h1>)
+  // }
   const u = JSON.parse(user ? user : "");
 
   return (

@@ -7,16 +7,14 @@ interface TxState {
   recursiveList:Transaction[]
   totalItems:Total;
 }
-const dateOnly = (d: string) => d.slice(0, 10);
+
 
 const addDays = (d: string, n: number) => {
-
-  const [y,m,dd] = dateOnly(d).split("-").map(Number);
-  console.log(y,m,dd);
-  console.log(y,m,dd+n);
-  console.log(new Date(y, m , dd + n).toISOString().slice(0,10))
-  return new Date(y, m-1 , dd + n+1).toISOString().slice(0,10);
+  const dt = new Date(d);
+  dt.setDate(dt.getDate() + n);
+  return dt.toISOString().slice(0, 10);
 };
+
 
 
 const saved = sessionStorage.getItem("transaction");
@@ -51,92 +49,67 @@ export const transactions=createSlice({
      state.list=[];
      sessionStorage.removeItem("transaction")   
     },
-    sortTransaction:(state)=>{
-      state.list=state.list.sort((a,b)=>(Number(b.amount)-Number(a.amount)))
-      sessionStorage.setItem("totalSavedAmount",JSON.stringify(state.totalItems))
-    },
-   manageCounter:(state)=>{
-
-  // const today = new Date().toISOString().slice(0,10);
-  const today = new Date().toISOString().slice(0, 16);
-  
-    // console.log("MAnagerCouner")
-  console.log("Recurring Transaction",state.list.filter((rt,i)=>{
-    return rt.recurring===true; 
-  }))
-
-  const rList=state.list.filter((rt,i)=>{
-    return(
-       rt.recurring===true && rt.date<=today
-    )
-  })
-  console.log("rlist is ",rList);
-  
-  
-  rList.forEach(tx => {
-
     
-    // let next = dateOnly(tx.date);
-    let nextDate=tx.date;
-    // console.log("Next Date",nextDate)
- 
-    // if ( dateOnly(tx.expiryDate??"") < today) {
-    //   return;
-    // }
+   manageCounter: (state) => {
 
-    // let days = 0;
-    // switch((tx.interval || "").toLowerCase()){
-    //   case "daily": days = 1; break;
-    //   case "monthly": days = 30; break;
-    //   case "yearly": days = 365; break;
-    //   default: return;
-    // }
+  const today = new Date().toISOString().slice(0, 10);
 
-    // while (true) {
-      
-    
-       const due = addDays(nextDate, 1);
-       console.log("Due date",due,dateOnly(today))
-       console.log(due<=today)
+  const expandTx = (tx: Transaction): Transaction[] => {
+    if (!tx.recurring) return [];
 
-      //  if (due > today) break;
+    const start = tx.date.slice(0, 10); //YYYY-MM-DD
 
-      
-       state.recursiveList.unshift({
+    const expiry =
+  !tx.expiryDate || tx.expiryDate === "None"
+    ? "9999-12-31"
+    : tx.expiryDate.slice(0, 10);
+
+    const results: Transaction[] = [];
+
+    let current = start;
+
+    while (current <= today && current <= expiry) {
+      results.push({
         ...tx,
-        date:due,
-        id:uuid()
-       })
-       console.log(state.recursiveList);
-       tx.date=due;
-     
-    //   state.list.unshift({
-    //     ...tx,
-    //     // id: uuid(),
-    //     date: due,
-    //     // recurring:false,
-    //     // interval:"",
-    //     // expiryDate:"None"
-    //   });
+        id: uuid(),
+        date: current,
+      });
 
-   
-    //   next = due;
-    //   tx.count += 1;
-    //   console.log("Count",tx.count);
-     
-    //   if (due >= dateOnly(tx.expiryDate??"")) break;
-    //  }
-  }); 
+      switch ((tx.interval || "").toLowerCase()) {
+        case "daily":
+          current = addDays(current, 1);
+          break;
+        case "monthly": {
+          const d = new Date(current);
+          d.setMonth(d.getMonth() + 1);
+          current = d.toISOString().slice(0, 10);
+          break;
+        }
+        case "yearly": {
+          const d = new Date(current);
+          d.setFullYear(d.getFullYear() + 1);
+          current = d.toISOString().slice(0, 10);
+          break;
+        }
+        default:
+          return results;
+      }
+    }
 
-  
-  state.list = state.list.filter(tx =>
-    !tx.recurring || tx.expiryDate === "None" || dateOnly(tx.expiryDate??"") >= today
+    return results;
+  };
+
+  state.recursiveList = state.list
+    .flatMap(expandTx)
+   console.log(expandTx);
+  sessionStorage.setItem(
+    "recursive-transaction",
+    JSON.stringify(state.recursiveList)
   );
-
-  sessionStorage.setItem("transaction", JSON.stringify(state.list));
 }
+
  }
 })
-export const {addTransaction,deleteTransaction,editTransaction,total,clearTransaction,sortTransaction,manageCounter}=transactions.actions;
+export const {addTransaction,deleteTransaction,editTransaction,total,clearTransaction,manageCounter}=transactions.actions;
 export default transactions.reducer;
 

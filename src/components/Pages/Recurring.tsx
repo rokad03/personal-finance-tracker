@@ -30,7 +30,13 @@ function Recurring() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const transactions = useAppSelector((state) => state.transaction.list);
+const { list, recursiveList } = useAppSelector(s => s.transaction);
 
+const nonRecurring = list.filter(t => !t.recurring);
+
+const completeArray = [...recursiveList];
+
+  
   const recursiveTransactions = transactions.filter((t) => t.recurring === true)
   const TodaysTransaction = recursiveTransactions.filter((t) => {
  
@@ -67,33 +73,36 @@ function Recurring() {
         return dateValue.slice(0,10);
       }
     },
-    { field: 'expiryDate', headerName: 'Expiry Date', flex: 1 },
+    // { field: 'expiryDate', headerName: 'Expiry Date', flex: 1 , valueGetter:(value,row)=>{
+    //   const dateValue=row.expiryDate;
+    //   return dateValue.slice(0,10);
+    // }},
     { field: 'type', headerName: 'Type', flex: 1, sortable: false, },
     { field: 'category', headerName: 'Category', flex: 1, sortable: false, },
     { field: 'amount', headerName: 'Amount', flex: 1 },
     { field: 'interval', headerName: 'Interval', flex: 1, sortable: false, },
-    {
-      field: 'Next_Deducation',
-      headerName: 'Next Deduction',
-      flex: 1,
-      sortable: true,
+    // {
+    //   field: 'Next_Deducation',
+    //   headerName: 'Next Deduction',
+    //   flex: 1,
+    //   sortable: true,
 
-      valueGetter: (value, row) => {
-        const date = row.date;
-        const interval = row.interval;
+    //   valueGetter: (value, row) => {
+    //     const date = row.date;
+    //     const interval = row.interval;
 
-        // if (!date || !interval) return "N/A";
+    //     // if (!date || !interval) return "N/A";
 
-        let daysToAdd = 0;
-        switch (interval.toLowerCase()) {
-          case 'daily': daysToAdd = 2; break;
-          case 'monthly': daysToAdd = 31; break;
-          case 'yearly': daysToAdd = 365; break;
-          default: daysToAdd = 0;
-        }
-        return addDays(date, daysToAdd);
-      },
-    },
+    //     let daysToAdd = 0;
+    //     switch (interval.toLowerCase()) {
+    //       case 'daily': daysToAdd = 2; break;
+    //       case 'monthly': daysToAdd = 31; break;
+    //       case 'yearly': daysToAdd = 365; break;
+    //       default: daysToAdd = 0;
+    //     }
+    //     return addDays(date, daysToAdd);
+    //   },
+    // },
 
 
   ];
@@ -104,7 +113,7 @@ function Recurring() {
       <Paper sx={{ height: 400, width: '90%', margin: '0 auto' }}>
        
         <DataGrid
-          rows={TodaysTransaction}
+          rows={completeArray}
           columns={columns}
           initialState={{ pagination: { paginationModel } }}
           pageSizeOptions={[5, 10]}

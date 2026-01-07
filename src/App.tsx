@@ -19,7 +19,7 @@ export default function App() {
 
   return (
     <>
-      <BrowserRouter>
+  
       <Routes>
         <Route path='/' element={<ProtectedRoute><Dashboard/></ProtectedRoute>} />
         <Route path='/login' element={<Login/>}></Route>
@@ -29,7 +29,7 @@ export default function App() {
         <Route path="/recurring-transactions" element={<ProtectedRoute><Recurring /></ProtectedRoute>} />
         </Route>
       </Routes>
-      </BrowserRouter>
+    
     </>
   );
 }

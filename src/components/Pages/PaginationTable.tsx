@@ -13,6 +13,9 @@ const paginationModel = { page: 0, pageSize: 5 };
 function PaginationTable() {
   const dispatch = useAppDispatch();
   const transactions = useAppSelector((state) => state.transaction.list);
+  const  recursiveList = useAppSelector(s => s.transaction.recursiveList);
+  const nonRecurring = transactions.filter(t => !t.recurring);
+  const completeArray = [...nonRecurring, ...recursiveList];
   const [selectedTrans, setSelectedTrans] = useState<null | Transaction>(null);
   const columns: GridColDef[] = [
     { field: "id", headerName: "ID", flex: 0.5, sortable: false },
@@ -57,7 +60,7 @@ function PaginationTable() {
   const now = new Date();
 
 
-const effectiveTransactions = transactions.filter(t => {
+const effectiveTransactions = completeArray.filter(t => {
   if (!t.date) return false;
   return new Date(t.date).getTime() <= now.getTime();
 });
