@@ -44,11 +44,11 @@ const transactions = [...list, ...recursiveList];
 
   return () => clearInterval(id);},[dispatch])
 
-  // if (!user) {
-  //   return (<h1>User session expires</h1>)
-  // }
-  const u = JSON.parse(user ? user : "");
-
+  if (!user) {
+    return (<h1>User session expires</h1>)
+  }
+  // const u = JSON.parse(user ? user : "");
+  const u = user ? JSON.parse(user) : null;
   return (
     <>
       <Navbar></Navbar>

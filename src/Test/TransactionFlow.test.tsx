@@ -4,13 +4,14 @@ import { Provider } from "react-redux";
 import { MemoryRouter } from "react-router-dom";
 import { store } from "../components/store/store";
 import App from "../App";
-import { loginRequest } from "../components/slice/loginSlice";
+import { loginRequest, logout } from "../components/slice/loginSlice";
 
 jest.mock("uuid", () => ({
   v4: () => "static-uuid-123"
 }));
 
-describe("Add transaction → update Dashboard", () => {
+
+describe("Add transaction and update Dashboard", () => {
     jest.setTimeout(300000)
   beforeEach(() => {
     sessionStorage.setItem(
@@ -33,7 +34,7 @@ describe("Add transaction → update Dashboard", () => {
     </Provider>
    ) 
    expect(screen.queryByText("Login")).not.toBeInTheDocument();
-    // expect(await screen.findByText(/welcome emilys/i)).toBeInTheDocument();
+   
   })
 
   test("Test the empty user data",async()=>{
@@ -90,6 +91,9 @@ describe("Add transaction → update Dashboard", () => {
 
     const logoutBtn=await screen.findByRole("button",{name:/logout/i});
     await user.click(logoutBtn);
+    
+   
+
     expect(await screen.findAllByText("Login")).toHaveLength(2);
 
     await user.type(screen.getByPlaceholderText("username"), "emilys");
@@ -118,8 +122,8 @@ describe("Add transaction → update Dashboard", () => {
     await user.type(amount, "200");
     await user.type(category, "Sports");
 
-    await user.type(date, "2026-01-01T10:00");
-    expect(date).toHaveValue("2026-01-01T10:00")
+    await user.type(date, "2026-01-01");
+    expect(date).toHaveValue("2026-01-01")
     
     expect(submit).toBeEnabled();
 

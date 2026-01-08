@@ -55,14 +55,15 @@ export const transactions=createSlice({
   const today = new Date().toISOString().slice(0, 10);
 
   const expandTx = (tx: Transaction): Transaction[] => {
-    if (!tx.recurring) return [];
+    if (!tx.recurring || !tx.interval || !tx.expiryDate) return [];
 
     const start = tx.date.slice(0, 10); //YYYY-MM-DD
 
-    const expiry =
-  !tx.expiryDate || tx.expiryDate === "None"
-    ? "9999-12-31"
-    : tx.expiryDate.slice(0, 10);
+    const expiry=tx.expiryDate.slice(0, 10);;
+  //   const expiry =
+  // !tx.expiryDate || tx.expiryDate === "None"
+  //   ? "9999-12-31"
+  //   : tx.expiryDate.slice(0, 10);
 
     const results: Transaction[] = [];
 
@@ -75,7 +76,7 @@ export const transactions=createSlice({
         date: current,
       });
 
-      switch ((tx.interval || "").toLowerCase()) {
+      switch ((tx.interval).toLowerCase()) {
         case "daily":
           current = addDays(current, 1);
           break;
@@ -91,8 +92,6 @@ export const transactions=createSlice({
           current = d.toISOString().slice(0, 10);
           break;
         }
-        default:
-          return results;
       }
     }
 
@@ -101,7 +100,7 @@ export const transactions=createSlice({
 
   state.recursiveList = state.list
     .flatMap(expandTx)
-   console.log(expandTx);
+  //  console.log(expandTx);
   sessionStorage.setItem(
     "recursive-transaction",
     JSON.stringify(state.recursiveList)

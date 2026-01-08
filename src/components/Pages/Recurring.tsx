@@ -9,19 +9,6 @@ import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { manageCounter } from '../slice/transactionSlice';
 const paginationModel = { page: 0, pageSize: 5 };
 
-const addDays = (dateStr: string, days: number) => {
-  if (!dateStr) return "";
-
-
-  const [datePart, timePart] = dateStr.split("T");
-
-  const [y, m, d] = datePart.split("-").map(Number);
-  
-  const nextDate = new Date(y, m - 1, d + days);
-
-  const nextDateStr = nextDate.toISOString().slice(0, 10);
-  return `${nextDateStr} ${timePart || ""}`;
-};
 
 
 
@@ -29,27 +16,12 @@ const addDays = (dateStr: string, days: number) => {
 function Recurring() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const transactions = useAppSelector((state) => state.transaction.list);
-const { list, recursiveList } = useAppSelector(s => s.transaction);
+  const { list, recursiveList } = useAppSelector(s => s.transaction);
 
-const nonRecurring = list.filter(t => !t.recurring);
 
 const completeArray = [...recursiveList];
 
-  
-  const recursiveTransactions = transactions.filter((t) => t.recurring === true)
-  const TodaysTransaction = recursiveTransactions.filter((t) => {
- 
-    const todayFormatted = new Date().toISOString().slice(0, 16);
-    
-    
-    const storedDateFormatted = t.date.slice(0, 16);
-    
-    console.log("Comparing:", storedDateFormatted, "with", todayFormatted);
-    
-    
-    return storedDateFormatted <= todayFormatted;
-});
+
 
   const user = sessionStorage.getItem("session_user")
   useEffect(() => {

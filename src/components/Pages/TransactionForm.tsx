@@ -194,7 +194,7 @@
                                     />
 
                                     <TextField
-                                        type="datetime-local"
+                                        type="date"
                                         slotProps={{
                                             htmlInput: {
                                                 "data-testid": "date",
@@ -240,7 +240,7 @@
                                             </TextField>
                                             <InputLabel>Transaction Expiry Date</InputLabel>
                                             <TextField
-                                                type="datetime-local"
+                                                type="date"
                                                 slotProps={{
                                                     htmlInput: {
                                                         "data-testid": "expiryDate",
