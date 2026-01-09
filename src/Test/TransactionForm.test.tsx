@@ -162,5 +162,6 @@ describe("TransactionForm", () => {
     );
 
     expect(onClose).toHaveBeenCalled();
+
   });
 });

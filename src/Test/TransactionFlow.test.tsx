@@ -9,10 +9,10 @@ import { loginRequest, logout } from "../components/slice/loginSlice";
 jest.mock("uuid", () => ({
   v4: () => "static-uuid-123"
 }));
-
+jest.setTimeout(300000)
 
 describe("Add transaction and update Dashboard", () => {
-    jest.setTimeout(300000)
+    
   beforeEach(() => {
     sessionStorage.setItem(
       "session_user",

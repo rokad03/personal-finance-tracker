@@ -7,7 +7,6 @@ import {
   loginSuccess,
   restoreSession,
   restoreFinished,
-  logout,
 } from "../slice/loginSlice";
 import { AuthResponse, UserRes } from "../../Types/types";
 
@@ -39,7 +38,7 @@ export function* handleLogin(action: ReturnType<typeof loginRequest>
     );
     // console.log(data);
 
-    const expiresAt = Date.now() + 1000; // 30 mins
+    const expiresAt = Date.now() + 1000*60*30; // 30 mins
 
     const user: UserRes = {
       ...data,

@@ -3,6 +3,7 @@ import { Provider } from "react-redux";
 import { render, screen } from "@testing-library/react";
 import Recurring from "../components/Pages/Recurring";
 import transactionReducer from "../components/slice/transactionSlice";
+import authReducer from "../components/slice/loginSlice";
 
 const mockedNavigate = jest.fn();
 
@@ -17,7 +18,7 @@ jest.mock("uuid", () => ({
 
 const renderWithStore = (preloadedState = {}) => {
   const store = configureStore({
-    reducer: { transaction: transactionReducer },
+    reducer: { auth: authReducer,transaction: transactionReducer },
     preloadedState
   });
 
@@ -111,28 +112,21 @@ describe("Recurring Page", () => {
 
     renderWithStore({
       transaction: {
-        list: [
-          {
+        list: [{
             id: "1",
             category: "Skit",
             type: "Expense",
             amount: "500",
-            date: "2026-01-08",
+            date: "2026-01-09",
             recurring: true,
             interval: "Daily",
             expiryDate: "2026-01-20",
             count: 1
-          },
-          {
-            id: "2",
-            category: "Food",
-            type: "Expense",
-            amount: "200",
-            date: "2025-01-01",
-            recurring: false,
           }
+          
         ],
-        recursiveList: [],
+        recursiveList: [
+          ],
         totalItems: {}
       }
     });

@@ -11,6 +11,7 @@ jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
   useNavigate: () => mockedNavigate,
 }));
+
 jest.mock("uuid", () => ({
   v4: jest.fn(() => "mock-uuid-123"),
 }));
@@ -54,7 +55,7 @@ describe("Dashboard Component", () => {
   test("renders initial dashboard UI", () => {
     sessionStorage.setItem(
       "session_user",
-      JSON.stringify({ username: "Nishit" })
+      JSON.stringify({ username: "Nishit" , expiresAt:Date.now() + 1000*30*60})
     );
 
     renderWithProviders({
@@ -74,7 +75,7 @@ describe("Dashboard Component", () => {
   test("renders transaction data correctly", () => {
     sessionStorage.setItem(
       "session_user",
-      JSON.stringify({ username: "Nishit" })
+      JSON.stringify({ username: "Nishit", expiresAt:Date.now() + 1000*30*60 })
     );
 
     renderWithProviders({
@@ -99,7 +100,7 @@ describe("Dashboard Component", () => {
   test("top expense category is displayed", () => {
     sessionStorage.setItem(
       "session_user",
-      JSON.stringify({ username: "Nishit" })
+      JSON.stringify({ username: "Nishit", expiresAt:Date.now() + 1000*30*60 })
     );
 
     renderWithProviders({

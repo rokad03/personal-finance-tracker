@@ -1,4 +1,4 @@
-import { createSlice, current, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Total, Transaction } from "../../Types/types";
 import { v4 as uuid } from "uuid";
 
@@ -60,10 +60,7 @@ export const transactions=createSlice({
     const start = tx.date.slice(0, 10); //YYYY-MM-DD
 
     const expiry=tx.expiryDate.slice(0, 10);;
-  //   const expiry =
-  // !tx.expiryDate || tx.expiryDate === "None"
-  //   ? "9999-12-31"
-  //   : tx.expiryDate.slice(0, 10);
+  
 
     const results: Transaction[] = [];
 
@@ -98,9 +95,7 @@ export const transactions=createSlice({
     return results;
   };
 
-  state.recursiveList = state.list
-    .flatMap(expandTx)
-  //  console.log(expandTx);
+  state.recursiveList = state.list.flatMap(expandTx)
   sessionStorage.setItem(
     "recursive-transaction",
     JSON.stringify(state.recursiveList)

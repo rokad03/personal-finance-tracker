@@ -13,7 +13,7 @@ const paginationModel = { page: 0, pageSize: 5 };
 function PaginationTable() {
   const dispatch = useAppDispatch();
   const transactions = useAppSelector((state) => state.transaction.list);
-  const  recursiveList = useAppSelector(s => s.transaction.recursiveList);
+  const recursiveList = useAppSelector(s => s.transaction.recursiveList);
   const nonRecurring = transactions.filter(t => !t.recurring);
   const completeArray = [...nonRecurring, ...recursiveList];
   const [selectedTrans, setSelectedTrans] = useState<null | Transaction>(null);
@@ -59,7 +59,7 @@ function PaginationTable() {
   ];
   const now = new Date();
 
-
+//Calculating Dashboard data from todays transaction only
 const effectiveTransactions = completeArray.filter(t => {
   if (!t.date) return false;
   return new Date(t.date).getTime() <= now.getTime();
@@ -75,6 +75,8 @@ const effectiveTransactions = completeArray.filter(t => {
   const Expense = effectiveTransactions
     .filter((t) => t.type === "Expense")
     .reduce((sum, i) => sum + Number(i.amount), 0);
+
+  //calculating top3 incomes and expenses
   const categoryExpenseSorting: Record<string, number> = {};
   const categoryIncomeSorting: Record<string, number> = {};
   effectiveTransactions.forEach((t) => {
@@ -95,6 +97,7 @@ const effectiveTransactions = completeArray.filter(t => {
     .slice(0, 3)
     .map(([category, amount]) => ({ category, amount }));
 
+    
   useEffect(() => {
     dispatch(
       total({

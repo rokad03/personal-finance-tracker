@@ -22,6 +22,7 @@ function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
+  //if user present then navigate to dashboard
   useEffect(() => {
     if (users) navigate("/", { replace: true });
   }, [users, navigate]);

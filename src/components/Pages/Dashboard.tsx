@@ -23,31 +23,30 @@ import { CategoryListing } from "../../Types/types";
 function Dashboard() {
   const dispatch=useDispatch();
   const { totalItems } = useAppSelector((state) => state.transaction)
-  const { list, recursiveList } = useAppSelector((s) => s.transaction);
-
-const transactions = [...list, ...recursiveList];
+  // const { list, recursiveList } = useAppSelector((s) => s.transaction);
 
   const { Income = 0, Expense = 0, top3Income,top3Expense } = totalItems;
   const navigate = useNavigate();
   const user = sessionStorage.getItem("session_user")
 
+  //not user, navigate to login
   useEffect(() => {
+    
     if (!user) {  
       navigate("/login", { replace: true });
     }
 
   }, [user, navigate]);
-    useEffect(()=>{dispatch(manageCounter());
-       const id = setInterval(() => {
-    dispatch(manageCounter());
-  }, 60 * 1000); // 1 min
+ 
+  useEffect(() => {
+      dispatch(manageCounter())
+    }, [dispatch])
 
-  return () => clearInterval(id);},[dispatch])
 
   if (!user) {
     return (<h1>User session expires</h1>)
   }
-  // const u = JSON.parse(user ? user : "");
+
   const u = user ? JSON.parse(user) : null;
   return (
     <>
@@ -84,7 +83,7 @@ const transactions = [...list, ...recursiveList];
         <Card sx={{ bgcolor: (Income-Expense>=0)?"#daebdcff":"#ffebee" }}>
           <CardContent>
             <Typography variant="subtitle1">Current Balance</Typography>
-            <Typography variant="h5" color="error.main">
+            <Typography variant="h5" color={(Income-Expense>=0)?"success.main":"error.main"}>
               {Income - Expense}
             </Typography>
           </CardContent>

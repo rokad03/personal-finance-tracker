@@ -57,4 +57,36 @@ describe("Dashboard Component", () => {
     expect(screen.queryByText("Add Transaction")).not.toBeInTheDocument();
 
   })
+  test("clears all transactions when 'Clear all transactions' is clicked", async () => {
+    const user = userEvent.setup();
+    
+    const initialState = {
+      transaction: {
+        list: [
+          {
+            id: "1",
+            category: "Gym",
+            type: "Expense",
+            amount: "500",
+            date: "2026-01-01",
+            recurring: true,
+            interval: "Yearly",
+            expiryDate: "2026-01-20",
+            count: 1
+          }
+        ],
+        recursiveList: [],
+        totalItems: { tAmount: 6000, Income: 6000, Expense: 0 }
+      }
+    };
+
+    renderWithProviders(initialState);
+    
+   
+    const clearButton = screen.getByRole("button", { name: /clear all transactions/i });
+    await user.click(clearButton);
+    expect(screen.queryByText("Gym")).not.toBeInTheDocument();
+
+   
+  });
 })
