@@ -18,12 +18,13 @@ function PaginationTable() {
   const completeArray = [...nonRecurring, ...recursiveList];
   const [selectedTrans, setSelectedTrans] = useState<null | Transaction>(null);
   const columns: GridColDef[] = [
+    {field:"SNo",headerName:"SNO",flex:0.5,renderCell:(params)=>{ return params.api.getRowIndexRelativeToVisibleRows(params.id) + 1;}},
     { field: "id", headerName: "ID", flex: 0.5, sortable: false },
     { field: "date", headerName: "Date", flex: 1 },
     { field: "expiryDate", headerName: "Expiry Date", flex: 1 },
     { field: "type", headerName: "Type", flex: 1, sortable: false },
     { field: "category", headerName: "Category", flex: 1, sortable: false },
-    { field: "amount", headerName: "Amount", flex: 1 },
+    { field: "amount", headerName: "Amount", flex: 1, type:"number"},
     { field: "recurring", headerName: "Recurring", flex: 1, sortable: false },
     { field: "interval", headerName: "Interval", flex: 1, sortable: false },
     {
@@ -89,7 +90,7 @@ const effectiveTransactions = completeArray.filter(t => {
     }
   });
   const top3Expense = Object.entries(categoryExpenseSorting)
-    .sort((a, b) => b[1] - a[1])
+    .sort((a, b) => b[1] - a[1])            
     .slice(0, 3)
     .map(([category, amount]) => ({ category, amount }));
   const top3Income = Object.entries(categoryIncomeSorting)
@@ -97,7 +98,7 @@ const effectiveTransactions = completeArray.filter(t => {
     .slice(0, 3)
     .map(([category, amount]) => ({ category, amount }));
 
-    
+
   useEffect(() => {
     dispatch(
       total({

@@ -1,7 +1,7 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
-import { initial } from '../../Types/types';
+import { Initial } from '../../Types/types';
 
-const initialState:initial = {
+const initialState:Initial = {
     loading:false,
     users:null,
     restoring:true
@@ -33,6 +33,7 @@ export const loginSlice = createSlice({
             state.users=null;
             state.restoring=false;
             state.error="";
+            sessionStorage.removeItem("session_user");
         },
        
     }           

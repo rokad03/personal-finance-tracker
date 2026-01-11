@@ -12,9 +12,9 @@ function Navbar() {
       <AppBar position="static" role="navigation">
         <Toolbar>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-           <Link to="/dashboard">Dashboard</Link> {' '}
-           <Link to="/transactions">Transactions</Link> {' '}
-           <Link to="/recurring-transactions">Reports</Link>
+           <Link to="/dashboard" style={{ textDecoration: 'none', color: 'white', marginRight: '20px' }}>Dashboard</Link> {' '}
+           <Link to="/transactions" style={{ textDecoration: 'none', color: 'white', marginRight: '20px' }}>Transactions</Link> {' '}
+           <Link to="/recurring-transactions" style={{ textDecoration: 'none', color: 'white', marginRight: '20px' }}>Reports</Link>
           </Typography>
           <Button color="inherit" onClick={()=>dispatch(logout())}>Logout</Button>
         </Toolbar>

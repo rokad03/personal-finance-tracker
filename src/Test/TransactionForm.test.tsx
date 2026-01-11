@@ -5,7 +5,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import transactionReducer, { addTransaction, editTransaction } from "../components/slice/transactionSlice";
 import TransactionForm from "../components/Pages/TransactionForm";
-import { Type } from "../Types/types";
+import { MethodType } from "../Types/types";
 
 jest.mock("uuid", () => ({
   v4: () => "static-id-123"
@@ -140,7 +140,7 @@ describe("TransactionForm", () => {
       amount: "200",
       category: "Food",
       date: "2025-01-01T10:00",
-      type: "Income" as Type,
+      type: "Income" as MethodType,
       recurring: false,
       count: 1,
       expiryDate: "None",

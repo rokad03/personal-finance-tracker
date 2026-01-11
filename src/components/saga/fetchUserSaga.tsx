@@ -10,6 +10,8 @@ import {
 } from "../slice/loginSlice";
 import { AuthResponse, UserRes } from "../../Types/types";
 
+const loginAPI="https://dummyjson.com/auth/login"
+const authorisationAPI= "https://dummyjson.com/auth/refresh"
 
 export function* apiPost<T>(url: string, body: unknown): SagaIterator<T> {
   const res: Response = yield call(fetch, url, {
@@ -33,10 +35,10 @@ export function* handleLogin(action: ReturnType<typeof loginRequest>
   try {
     const data: AuthResponse = yield call(
       apiPost<AuthResponse>,
-      "https://dummyjson.com/auth/login",
+      loginAPI,
       { username, password, expiresInMins: 30 }
     );
-    // console.log(data);
+ 
 
     const expiresAt = Date.now() + 1000*60*30; // 30 mins
 
@@ -55,10 +57,10 @@ export function* handleLogin(action: ReturnType<typeof loginRequest>
 }
 
 export function* handleRestore(): SagaIterator {
-    // console.log("Handle restore calling");
+
   try {
     const stored = sessionStorage.getItem("session_user");
-    // console.log(stored);
+  
     if (!stored) {
       yield put(restoreFinished());
       return;
@@ -66,7 +68,7 @@ export function* handleRestore(): SagaIterator {
 
     let user: UserRes = JSON.parse(stored);
 
-    // console.log(Date.now(),user.expiresAt)
+ 
     if (Date.now() < user.expiresAt) {
       
       yield put(loginSuccess(user));
@@ -77,26 +79,25 @@ export function* handleRestore(): SagaIterator {
     try {
       const refresh: AuthResponse = yield call(
         apiPost<AuthResponse>,
-        "https://dummyjson.com/auth/refresh",
+        authorisationAPI,
         {
           refreshToken: user.refreshToken,
           expiresInMins: 30,
         }
       );
-    //   console.log(user);
-    //   console.log("refresh",refresh)
+  
       user = {
         ...user,
         accessToken: refresh.authToken,
-        refreshToken:refresh.refreshToken,
+        refreshToken: refresh.refreshToken,
         expiresAt: Date.now() + 1000,
       };
-    //   console.log(user);
+   
       sessionStorage.setItem("session_user", JSON.stringify(user));
 
       yield put(loginSuccess(user));
     } catch {
-        // console.log("Executing catch")
+      
       sessionStorage.removeItem("session_user");
       yield put(loginError("Session expired — login again"));
     }

@@ -7,7 +7,7 @@
 export type Values = {
   id: string,
   amount: string,
-  type: Type,
+  type: MethodType,
   category: string,
   date: string,
   recurring:boolean,
@@ -21,20 +21,25 @@ export interface User {
     lastName: string;   
     email: string;
 }
-export type initial={
+export type Initial={
     loading:Boolean,
-    users:users|null,
+    users:Users|null,
     error?:string,
     restoring:boolean
 }
-export type users={
+export type Users={
     username:string,
     password:string
 }
-export type Type= "Income"|"Expense";
+// export type TransactionType= "Income"|"Expense";
+export enum MethodType {
+  Income = "Income",
+  Expense = "Expense",
+}
+
 export type Transaction = {
   id: string;
-  type: Type;
+  type: MethodType;
   amount: string;
   date: string;
   recurring: boolean;
