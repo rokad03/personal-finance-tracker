@@ -12,36 +12,28 @@ import {
   TableRow,
 } from "@mui/material";
 
-import Navbar from "../Navbar";
-import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+
 import { useAppSelector } from "../hooks";
-import { manageCounter } from "../slice/transactionSlice";
-import { useDispatch } from "react-redux";
 import { CategoryListing } from "../../Types/types";
 
 function Dashboard() {
-  const dispatch=useDispatch();
+  
+  //Select the total Items
   const { totalItems } = useAppSelector((state) => state.transaction)
-  // const { list, recursiveList } = useAppSelector((s) => s.transaction);
 
   const { Income = 0, Expense = 0, top3Income,top3Expense } = totalItems;
-  const navigate = useNavigate();
+
   const user = sessionStorage.getItem("session_user")
 
   //not user, navigate to login
-  useEffect(() => {
+  // useEffect(() => {
     
-    if (!user) {  
-      navigate("/login", { replace: true });
-    }
+  //   if (!user) {  
+  //     navigate("/login", { replace: true });
+  //   }
 
-  }, [user, navigate]);
+  // }, [user, navigate]);
  
-  useEffect(() => {
-      dispatch(manageCounter())
-    }, [dispatch])
-
 
   if (!user) {
     return (<h1>User session expires</h1>)
@@ -50,7 +42,6 @@ function Dashboard() {
   const u = user ? JSON.parse(user) : null;
   return (
     <>
-      <Navbar></Navbar>
       <Typography
         variant="h4"
         sx={{ textAlign: 'center', width: '100%', margin:'15px'}}
@@ -78,8 +69,6 @@ function Dashboard() {
           </CardContent>
         </Card>
 
-
-
         <Card sx={{ bgcolor: (Income-Expense>=0)?"#daebdcff":"#ffebee" }}>
           <CardContent>
             <Typography variant="subtitle1">Current Balance</Typography>
@@ -94,6 +83,7 @@ function Dashboard() {
       
       <Grid container spacing={3} sx={{ p: 3 }}>
          
+          {/* Top3 Expenses Table */}
           <Grid size={{ xs: 12, md: 6 }}  >
             <TableContainer component={Paper} elevation={3}>
               <Typography variant="h6" sx={{ p: 2, bgcolor: '#f5f5f5', borderBottom: '1px solid #ddd' }}>

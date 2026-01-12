@@ -17,7 +17,14 @@ export const store = configureStore({
     getDefaultMiddleware({ thunk: false }).concat(sagaMiddleware),
   
 });
+store.subscribe(() => {
+  const state = store.getState();
 
+  sessionStorage.setItem(
+    "transaction",
+    JSON.stringify(state.transaction.list)
+  );
+});
 sagaMiddleware.run(usersRootSaga);
 
 

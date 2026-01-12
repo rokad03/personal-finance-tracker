@@ -8,7 +8,7 @@ import {
   Button,
   Alert,
   Stack,
-  Box
+  Box,
 } from "@mui/material";
 import { useAppDispatch, useAppSelector } from "./hooks";
 import { loginError, loginRequest } from "./slice/loginSlice";
@@ -17,27 +17,46 @@ function Login() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const { users, error } = useAppSelector((state) => state.auth);
+  const { users, error, loading } = useAppSelector((state) => state.auth);
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [hasSubmitted, setHasSubmitted] = useState(false);
 
-  //if user present then navigate to dashboard
+  /* ---------- FIELD VALIDATION ---------- */
+
+  const isUsernameInvalid =
+    hasSubmitted && username.trim() === "";
+
+  const isPasswordInvalid =
+    hasSubmitted && password.trim() === "";
+
+  const isFormValid =
+    username.trim() !== "" && password.trim() !== "";
+
+  /* ---------- EFFECT ---------- */
+
   useEffect(() => {
     if (users) navigate("/", { replace: true });
   }, [users, navigate]);
 
-  const handleClick = (e: React.FormEvent) => {
-    e.preventDefault();
+  /* ---------- SUBMIT ---------- */
 
-    if (username.length === 0 || password.length === 0) {
-      dispatch(loginError("username or password not exists"));
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setHasSubmitted(true);
+
+    if (!isFormValid) {
+      // Field-level errors only
       return;
     }
 
-   
+    // Clear old auth error before new request
+    dispatch(loginError(""));
     dispatch(loginRequest({ username, password }));
   };
+
+  /* ---------- UI ---------- */
 
   return (
     <Container maxWidth="xs" sx={{ mt: 8 }}>
@@ -46,31 +65,41 @@ function Login() {
           Login
         </Typography>
 
-        <Box component="form" onSubmit={handleClick}>
+        <Box component="form" onSubmit={handleSubmit}>
           <Stack spacing={2}>
+            {/* Server/auth error */}
             {error && <Alert severity="error">{error}</Alert>}
 
             <TextField
-              placeholder="username"   
+              label="Username"
               fullWidth
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              error={isUsernameInvalid}
+              helperText={
+                isUsernameInvalid ? "Username is required" : ""
+              }
             />
 
             <TextField
-              placeholder="Password"   
+              label="Password"
               type="password"
               fullWidth
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              error={isPasswordInvalid}
+              helperText={
+                isPasswordInvalid ? "Password is required" : ""
+              }
             />
 
             <Button
               type="submit"
               variant="contained"
               fullWidth
+              disabled={loading}
             >
-              Login  
+              Login
             </Button>
           </Stack>
         </Box>

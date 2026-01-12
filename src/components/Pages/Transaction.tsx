@@ -5,13 +5,10 @@ import {
   Button,
 } from "@mui/material";
 
-
-import { useNavigate } from "react-router-dom";
-
 import TransactionForm from "./TransactionForm";
 import PaginationTable from "./PaginationTable";
 import { useAppDispatch, useAppSelector } from "../hooks";
-import { manageCounter,clearTransaction } from "../slice/transactionSlice";
+import { manageRecursiveTransactions,clearTransaction } from "../slice/transactionSlice";
 
 
 export default function Transaction() {
@@ -19,21 +16,11 @@ export default function Transaction() {
   const list = useAppSelector(state => state.transaction.list);
 
   useEffect(() => {
-    dispatch(manageCounter());
+    dispatch(manageRecursiveTransactions());
   }, [list, dispatch]);
 
-  const navigate = useNavigate();
 
   const [display, setDisplay] = useState(false);
-
-  const user = sessionStorage.getItem("session_user")
-
-  //If user not present, navigate to login
-  useEffect(() => {
-    if (!user) {
-      navigate("/login", { replace: true });
-    }
-  }, [user, navigate]);
 
   return (
     <>

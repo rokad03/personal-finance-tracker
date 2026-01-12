@@ -22,7 +22,7 @@ export interface User {
     email: string;
 }
 export type Initial={
-    loading:Boolean,
+    loading:boolean,
     users:Users|null,
     error?:string,
     restoring:boolean

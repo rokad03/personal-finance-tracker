@@ -33,7 +33,6 @@ export const loginSlice = createSlice({
             state.users=null;
             state.restoring=false;
             state.error="";
-            sessionStorage.removeItem("session_user");
         },
        
     }           

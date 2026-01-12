@@ -4,10 +4,9 @@ import { v4 as uuid } from "uuid";
 
 interface TxState {
   list: Transaction[];
-  recursiveList:Transaction[]
-  totalItems:Total;
+   recursiveList:Transaction[]
+   totalItems:Total;
 }
-
 
 const addDays = (d: string, n: number) => {
   const dt = new Date(d);
@@ -15,15 +14,13 @@ const addDays = (d: string, n: number) => {
   return dt.toISOString().slice(0, 10);
 };
 
-
-
 const saved = sessionStorage.getItem("transaction");
-const resSaved=sessionStorage.getItem("recursive-transaction")
-const savedTotalAmount=sessionStorage.getItem("totalSavedAmount")
+// const resSaved=sessionStorage.getItem("recursive-transaction")
+// const savedTotalAmount=sessionStorage.getItem("totalSavedAmount")
 const initialState: TxState = {
   list: saved?JSON.parse(saved):[],
-  recursiveList:  resSaved?JSON.parse(resSaved):[],
-  totalItems: savedTotalAmount?JSON.parse(savedTotalAmount):{tAmount:0}
+  recursiveList:  [],
+  totalItems: { Income: 0, Expense: 0, tAmount: 0, top3Income: [], top3Expense: [] },
 };
 export const transactions=createSlice({
  name:"transactons",
@@ -31,26 +28,26 @@ export const transactions=createSlice({
  reducers:{
     addTransaction:(state,action:PayloadAction<Transaction>)=>{
       state.list.unshift(action.payload);
-      sessionStorage.setItem("transaction",JSON.stringify(state.list))
+      // sessionStorage.setItem("transaction",JSON.stringify(state.list))
     },
     deleteTransaction:(state,action:PayloadAction<string>)=>{
      state.list=state.list.filter(t=>t.id!==action.payload)
-     sessionStorage.setItem("transaction",JSON.stringify(state.list))
+    //  sessionStorage.setItem("transaction",JSON.stringify(state.list))
     },
     editTransaction:(state,action:PayloadAction<Transaction>)=>{
      state.list=state.list.map(t=>t.id===action.payload.id?action.payload:t)
-     sessionStorage.setItem("transaction",JSON.stringify(state.list))
+    //  sessionStorage.setItem("transaction",JSON.stringify(state.list))
     },
     total:(state,action:PayloadAction<Total>)=>{
      state.totalItems=action.payload
-     sessionStorage.setItem("totalSavedAmount",JSON.stringify(state.totalItems))
+    //  sessionStorage.setItem("totalSavedAmount",JSON.stringify(state.totalItems))
     },
     clearTransaction:(state)=>{
      state.list=[];
-     sessionStorage.removeItem("transaction")   
+    //  sessionStorage.removeItem("transaction")   
     },
     
-   manageCounter: (state) => {
+   manageRecursiveTransactions: (state) => {
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -96,14 +93,14 @@ export const transactions=createSlice({
   };
 
   state.recursiveList = state.list.flatMap(expandTx)
-  sessionStorage.setItem(
-    "recursive-transaction",
-    JSON.stringify(state.recursiveList)
-  );
+  // sessionStorage.setItem(
+  //   "recursive-transaction",
+  //   JSON.stringify(state.recursiveList)
+  // );
 }
 
  }
 })
-export const {addTransaction,deleteTransaction,editTransaction,total,clearTransaction,manageCounter}=transactions.actions;
+export const {addTransaction,deleteTransaction,editTransaction,total,clearTransaction,manageRecursiveTransactions}=transactions.actions;
 export default transactions.reducer;
 
