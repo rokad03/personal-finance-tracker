@@ -23,7 +23,7 @@ function Login() {
   const [password, setPassword] = useState("");
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
-  /* ---------- FIELD VALIDATION ---------- */
+  //username and password filed validation
 
   const isUsernameInvalid =
     hasSubmitted && username.trim() === "";
@@ -34,13 +34,13 @@ function Login() {
   const isFormValid =
     username.trim() !== "" && password.trim() !== "";
 
-  /* ---------- EFFECT ---------- */
+  //check if user present then navigate to dashboard
 
   useEffect(() => {
     if (users) navigate("/", { replace: true });
   }, [users, navigate]);
 
-  /* ---------- SUBMIT ---------- */
+  //Submit action
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,6 +72,7 @@ function Login() {
 
             <TextField
               label="Username"
+              placeholder="username"
               fullWidth
               value={username}
               onChange={(e) => setUsername(e.target.value)}
@@ -83,6 +84,7 @@ function Login() {
 
             <TextField
               label="Password"
+              placeholder="password"
               type="password"
               fullWidth
               value={password}

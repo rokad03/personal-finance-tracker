@@ -10,10 +10,11 @@ import {
 } from "../slice/loginSlice";
 import { AuthResponse, UserRes } from "../../Types/types";
 
+
 const loginAPI = "https://dummyjson.com/auth/login";
 const refreshAPI = "https://dummyjson.com/auth/refresh";
-const ACCESS_TOKEN_LIFETIME = 1000*60*30; // 30 min
-const REFRESH_TOKEN_LIFETIME = 1000 * 60 * 30; // frontend assumption
+const ACCESS_TOKEN_LIFETIME = 1000*30*60; // 30 min
+const REFRESH_TOKEN_LIFETIME = 1000*30*60; 
 const SESSION_KEY = "session_user";
 function saveSession(user: UserRes) {
   sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
@@ -33,7 +34,7 @@ function isAccessTokenValid(user: UserRes) {
 }
 
 
-/* ---------- API ---------- */
+//API Calling
 
 function* apiPost<T>(url: string, body: unknown): SagaIterator<T> {
   const res: Response = yield call(fetch, url, {
@@ -46,7 +47,7 @@ function* apiPost<T>(url: string, body: unknown): SagaIterator<T> {
   return yield call([res, "json"]);
 }
 
-/* ---------- LOGIN ---------- */
+//Login Saga
 
 function* handleLogin(
   action: ReturnType<typeof loginRequest>
@@ -62,6 +63,7 @@ function* handleLogin(
       expiresAt: Date.now() + ACCESS_TOKEN_LIFETIME,
     };
 
+    // console.log("USer",user);
     saveSession(user);
     yield put(loginSuccess(user));
   } catch {
@@ -69,38 +71,40 @@ function* handleLogin(
   }
 }
 
-/* ---------- REFRESH ---------- */
+//Refresh Saga
 
 function* refreshAccessToken(user: UserRes): SagaIterator<UserRes> {
-  console.log(user.refreshToken)
+  // console.log(user.refreshToken)
+
   const refresh: AuthResponse = yield call(apiPost, refreshAPI, {
     refreshToken: user.refreshToken,
-    expiresInMins: 30,
+    // expiresInMins: 30,
   });
-
+  console.log(refresh);
   const updatedUser: UserRes = {
     ...user,
-    accessToken: refresh.authToken,
+    accessToken: refresh.accessToken,
     refreshToken: refresh.refreshToken,
     expiresAt: Date.now() + REFRESH_TOKEN_LIFETIME,
   };
 
+  console.log("UpdatedUSer",updatedUser);
   saveSession(updatedUser);
   return updatedUser;
 }
 
-/* ---------- RESTORE ---------- */
+//Restore the data
 
 function* handleRestore(): SagaIterator {
   const user = loadSession();
 
-  // 1️⃣ No session
+  //  No session
   if (!user) {
     yield put(restoreFinished());
     return;
   }
 
-  // 2️⃣ accessToken OR expiresAt missing
+  //  accessToken OR expiresAt missing
   if (!user.accessToken || !user.expiresAt) {
     clearSession();
     yield put(loginError("Session expired — login again"));
@@ -108,14 +112,14 @@ function* handleRestore(): SagaIterator {
     return;
   }
 
-  // 3️⃣ access token still valid
+  //  access token still valid and comparing date
   if (isAccessTokenValid(user)) {
     yield put(loginSuccess(user));
     yield put(restoreFinished());
     return;
   }
 
-  // 4️⃣ access token expired BUT refreshToken missing
+  //  access token expired BUT refreshToken missing
   if (!user.refreshToken) {
     clearSession();
     yield put(loginError("Session expired — login again"));
@@ -123,7 +127,7 @@ function* handleRestore(): SagaIterator {
     return;
   }
 
-  // 5️⃣ try refresh
+  //access token is expired and refresh token is still valid
   try {
     const refreshedUser: UserRes = yield call(refreshAccessToken, user);
     yield put(loginSuccess(refreshedUser));

@@ -56,28 +56,44 @@ describe("TransactionForm", () => {
 
   renderWithProviders(<TransactionForm onClose={jest.fn()} />);
 
-  await user.type(screen.getByTestId("amount"), "100");
-  await user.type(screen.getByTestId("Category"), "Food");
+    const amount = await screen.findByTestId("amount");
+    expect(amount).toBeInTheDocument();
+      const category = await  screen.findByTestId("Category");
+      const date = await screen.findByTestId("date");
 
-  await user.click(screen.getByRole("combobox", { name: /type/i }));
+  await user.type(amount, "100");
+  await user.type(category, "Food");
+
+  await user.click(screen.getByLabelText(/MoneyType/i));
   await user.click(screen.getByRole("option", { name: /income/i }));
+  expect(screen.getByTestId('Type')).toHaveValue("Income");
 
-  await user.type(screen.getByTestId("date"), "2026-01-08");
-
-  await user.click(screen.getByLabelText(/mark as recurring/i));
-
+  await user.type(date, "2026-01-08");
+  expect(date).toHaveValue("2026-01-08")
   const submit = screen.getByRole("button", { name: /add/i });
-  expect(submit).toBeDisabled();
-
-  const selects = screen.getAllByRole("combobox");
-  await user.click(selects[1]);
-  await user.click(screen.getByRole("option", { name: /monthly/i }));
-
-  await user.type(screen.getByTestId("expiryDate"), "2026-01-05");
-
   expect(submit).toBeEnabled();
-  await user.click(submit)
-  expect(await screen.findByText(/Expiry Date should be Greater then or Equal Transaction Date/i)).toBeInTheDocument();
+
+  const checkbox = await screen.findByRole('checkbox', { name: /mark as recurring/i })
+  await user.click(checkbox);
+  expect(checkbox).toBeChecked();
+
+  
+  
+  await user.click(screen.getByLabelText(/Interval/i));
+  await user.click(screen.getByRole("option",{name:/Daily/i}))
+  expect(screen.getByTestId('Recurring-type')).toHaveValue('Daily')
+
+  // const selects = screen.getAllByRole("combobox");
+  // await user.click(selects[1]);
+  // await user.click(screen.getByRole("option", { name: /monthly/i }));
+  const expiryDate=await screen.findByTestId("expiryDate")
+  await user.type(expiryDate, "2026-01-05");
+   expect(expiryDate).toHaveValue("2026-01-05")
+  expect(await screen.findByText(/Expiry date must be greater than transaction date/i)).toBeInTheDocument();
+
+  expect(submit).not.toBeEnabled();
+  // await user.click(submit)
+  
 
 });
 
@@ -93,15 +109,17 @@ describe("TransactionForm", () => {
     await user.type(screen.getByTestId("amount"), "500");
     await user.type(screen.getByTestId("Category"), "Laptop");
 
-    await user.click(screen.getByRole("combobox", { name: /type/i }));
+    await user.click(screen.getByLabelText(/MoneyType/i));
     await user.click(screen.getByRole("option", { name: /expense/i }));
 
     await user.type(screen.getByTestId("date"), "2026-01-01");
 
-    await user.click(screen.getByRole("button", { name: /add/i }));
+    const submitbtn=screen.getByRole("button", { name: /add/i })
+    expect(submitbtn).toBeEnabled();
+    await user.click(submitbtn);
 
     expect(
-      await screen.findByText(/income is less than or equal/i)
+      await screen.findByText(/Expense cannot exceed income/i)
     ).toBeInTheDocument();
   });
 

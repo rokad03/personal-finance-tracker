@@ -3,37 +3,84 @@ import {
   CardContent,
   Grid,
   Typography,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
 } from "@mui/material";
 
-
-import { useAppSelector } from "../hooks";
-import { CategoryListing } from "../../Types/types";
-
+import { useAppDispatch, useAppSelector } from "../hooks";
+import { manageRecursiveTransactions } from "../slice/transactionSlice";
+import { useEffect } from "react";
+import TopCategoryTable from "./CategoryTable";
 function Dashboard() {
-  
-  //Select the total Items
-  const { totalItems } = useAppSelector((state) => state.transaction)
+  const dispatch = useAppDispatch();
 
-  const { Income = 0, Expense = 0, top3Income,top3Expense } = totalItems;
+  //Calculate the recursive Transactions for dashboard
+  useEffect(() => {
+    dispatch(manageRecursiveTransactions());
+  }, [dispatch]);
 
+  //Get the user from session Storage to display username
   const user = sessionStorage.getItem("session_user")
+
+  //Calculate transactions and recursive transactions
+  const transactions = useAppSelector(
+    (state) => state.transaction.list
+  );
+
+  const recursiveList = useAppSelector(
+    (state) => state.transaction.recursiveList
+  );
+
+  const nonRecurring = transactions.filter((t) => !t.recurring);
+
+  //Complete array of recursive and non recursive transactions
+  const completeArray = [...nonRecurring, ...recursiveList];
+  const now = Date.now();
+
+  //Effective transactions till now.
+  const effectiveTransactions = completeArray.filter(
+    (t) => t.date && new Date(t.date).getTime() <= now
+  );
+
+  let Income = 0;
+  let Expense = 0;
+
+  //Create the object for the top3 Income and expense category wise
+  const incomeMap: Record<string, number> = {};
+  const expenseMap: Record<string, number> = {};
+
+  for (const t of effectiveTransactions) {
+    const amt = Number(t.amount);
+
+    if (t.type === "Income") {
+      Income += amt;
+      incomeMap[t.category] =
+        (incomeMap[t.category] || 0) + amt;
+    } else {
+      Expense += amt;
+      expenseMap[t.category] =
+        (expenseMap[t.category] || 0) + amt;
+    }
+  }
+
+  //Sort the top3 items based on amount
+  const toTop3 = (map: Record<string, number>) =>
+    Object.entries(map)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([category, amount]) => ({ category, amount }));
+
+  const top3Income = toTop3(incomeMap);
+  const top3Expense = toTop3(expenseMap);
+
 
   //not user, navigate to login
   // useEffect(() => {
-    
+
   //   if (!user) {  
   //     navigate("/login", { replace: true });
   //   }
 
   // }, [user, navigate]);
- 
+
 
   if (!user) {
     return (<h1>User session expires</h1>)
@@ -44,7 +91,7 @@ function Dashboard() {
     <>
       <Typography
         variant="h4"
-        sx={{ textAlign: 'center', width: '100%', margin:'15px'}}
+        sx={{ textAlign: 'center', width: '100%', margin: '15px' }}
       >
         Welcome {u.username}
       </Typography>
@@ -69,10 +116,10 @@ function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card sx={{ bgcolor: (Income-Expense>=0)?"#daebdcff":"#ffebee" }}>
+        <Card sx={{ bgcolor: (Income - Expense >= 0) ? "#daebdcff" : "#ffebee" }}>
           <CardContent>
             <Typography variant="subtitle1">Current Balance</Typography>
-            <Typography variant="h5" color={(Income-Expense>=0)?"success.main":"error.main"}>
+            <Typography variant="h5" color={(Income - Expense >= 0) ? "success.main" : "error.main"}>
               {Income - Expense}
             </Typography>
           </CardContent>
@@ -80,72 +127,27 @@ function Dashboard() {
 
       </Grid>
 
-      
-      <Grid container spacing={3} sx={{ p: 3 }}>
-         
-          {/* Top3 Expenses Table */}
-          <Grid size={{ xs: 12, md: 6 }}  >
-            <TableContainer component={Paper} elevation={3}>
-              <Typography variant="h6" sx={{ p: 2, bgcolor: '#f5f5f5', borderBottom: '1px solid #ddd' }}>
-                Top 3 Expenses 
-              </Typography>
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Category</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 'bold' }}>Amount (₹)</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {!top3Expense ? (
-                    <TableRow>
-                      <TableCell colSpan={2} align="center" sx={{ py: 3 }}>No Stats found</TableCell>
-                    </TableRow>
-                  ) : (
-                    top3Expense.map((tx:CategoryListing, i: number) => (
-                      <TableRow key={`exp-${i}`} hover>
-                        <TableCell>{tx.category}</TableCell>
-                        <TableCell align="right">{tx.amount}</TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Grid>
-          
-          {/* Top 3 Incomes Table */}
-          <Grid size={{ xs: 12, md: 6 }}>
-            <TableContainer component={Paper} elevation={3}>
-              <Typography variant="h6" sx={{ p: 2, bgcolor: '#f5f5f5', borderBottom: '1px solid #ddd' }}>
-                Top 3 Incomes
-              </Typography>
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Category</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 'bold' }}>Amount (₹)</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {!top3Income? (
-                    <TableRow>
-                      <TableCell colSpan={2} align="center" sx={{ py: 3 }}>No Stats found</TableCell>
-                    </TableRow>
-                  ) : (
-                    top3Income.map((tx: CategoryListing, i: number) => (
-                      <TableRow key={`inc-${i}`} hover>
-                        <TableCell>{tx.category}</TableCell>
-                        <TableCell align="right">{tx.amount}</TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Grid>
+
+
+     
+      <Grid container spacing={3} mt={2}>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <TopCategoryTable
+            title="Top 3 Expenses"
+            data={top3Expense}
+            emptyText="No expense data found"
+          />
         </Grid>
-        
+
+        <Grid size={{ xs: 12, md: 6 }}>
+          <TopCategoryTable
+            title="Top 3 Incomes"
+            data={top3Income}
+            emptyText="No income data found"
+          />
+        </Grid>
+      </Grid>
+
     </>
 
   )

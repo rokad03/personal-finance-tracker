@@ -4,7 +4,7 @@ import { Provider } from "react-redux";
 import { MemoryRouter } from "react-router-dom";
 import { store } from "../components/store/store";
 import App from "../App";
-import { loginRequest, logout } from "../components/slice/loginSlice";
+import { loginRequest} from "../components/slice/loginSlice";
 
 jest.mock("uuid", () => ({
   v4: () => "static-uuid-123"
@@ -60,9 +60,9 @@ describe("Add transaction and update Dashboard", () => {
    ) 
     expect(await screen.findAllByText("Login")).toHaveLength(2);  
     await user.type(screen.getByPlaceholderText("username"), "emils");
-    await user.type(screen.getByPlaceholderText("Password"), "emispass");
+    await user.type(screen.getByPlaceholderText("password"), "emispass");
     await user.click(screen.getByRole("button", { name:/login/i }));
-    expect(await screen.findByText(/Invalid username or password/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Invalid Credentials/i)).toBeInTheDocument();
 
   })
 
@@ -86,7 +86,7 @@ describe("Add transaction and update Dashboard", () => {
     // expect(screen.getByText("Total Income")).toBeInTheDocument();
     expect(await screen.findAllByText("Login")).toHaveLength(2);  
     await user.type(screen.getByPlaceholderText("username"), "emilys");
-    await user.type(screen.getByPlaceholderText("Password"), "emilyspass");
+    await user.type(screen.getByPlaceholderText("password"), "emilyspass");
     await user.click(screen.getByRole("button", { name:/login/i }));
 
     const logoutBtn=await screen.findByRole("button",{name:/logout/i});
@@ -97,7 +97,7 @@ describe("Add transaction and update Dashboard", () => {
     expect(await screen.findAllByText("Login")).toHaveLength(2);
 
     await user.type(screen.getByPlaceholderText("username"), "emilys");
-    await user.type(screen.getByPlaceholderText("Password"), "emilyspass");
+    await user.type(screen.getByPlaceholderText("password"), "emilyspass");
     await user.click(screen.getByRole("button", { name:/login/i }));
 
     expect(await screen.findByText(/welcome emilys/i)).toBeInTheDocument();
@@ -116,8 +116,8 @@ describe("Add transaction and update Dashboard", () => {
     const submit = screen.getByRole("button", { name: /add/i });
 
     await user.click(screen.getByLabelText(/MoneyType/i));
-    await user.click(screen.getByRole("option", { name: /income/i }));
-    expect(screen.getByTestId('Type')).toHaveValue("Income");
+    await user.click(screen.getByRole("option", { name: /expense/i }));
+    expect(screen.getByTestId('Type')).toHaveValue("Expense");
 
     await user.type(amount, "200");
     await user.type(category, "Sports");
@@ -127,6 +127,15 @@ describe("Add transaction and update Dashboard", () => {
     
     expect(submit).toBeEnabled();
 
+    await user.click(submit);
+
+    expect(await screen.findByText("Expense cannot exceed income")).toBeInTheDocument();
+
+     await user.click(screen.getByLabelText(/MoneyType/i));
+    await user.click(screen.getByRole("option", { name: /income/i }));
+    expect(screen.getByTestId('Type')).toHaveValue("Income");
+
+      expect(submit).toBeEnabled();
     await user.click(submit);
 
     expect(await screen.findByText("Income")).toBeInTheDocument();

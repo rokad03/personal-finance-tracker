@@ -63,12 +63,11 @@ export interface AuthResponse {
   id: number;
   username: string;
   email: string;
-  authToken: string;
+  accessToken?: string;
   refreshToken: string;
 }
 
 
 export interface UserRes extends AuthResponse {
-  accessToken?: string;
   expiresAt: number;   
 }

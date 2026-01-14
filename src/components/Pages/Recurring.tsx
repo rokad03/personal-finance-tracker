@@ -30,12 +30,6 @@ export default function Recurring() {
           params.api.getRowIndexRelativeToVisibleRows(params.id) + 1,
       },
       {
-        field: "id",
-        headerName: "TransactionID",
-        flex: 0.5,
-        sortable: false,
-      },
-      {
         field: "date",
         headerName: "Date",
         flex: 1,

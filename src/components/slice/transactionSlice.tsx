@@ -38,10 +38,10 @@ export const transactions=createSlice({
      state.list=state.list.map(t=>t.id===action.payload.id?action.payload:t)
     //  sessionStorage.setItem("transaction",JSON.stringify(state.list))
     },
-    total:(state,action:PayloadAction<Total>)=>{
-     state.totalItems=action.payload
-    //  sessionStorage.setItem("totalSavedAmount",JSON.stringify(state.totalItems))
-    },
+    // total:(state,action:PayloadAction<Total>)=>{
+    //  state.totalItems=action.payload
+    // //  sessionStorage.setItem("totalSavedAmount",JSON.stringify(state.totalItems))
+    // },
     clearTransaction:(state)=>{
      state.list=[];
     //  sessionStorage.removeItem("transaction")   
@@ -101,6 +101,6 @@ export const transactions=createSlice({
 
  }
 })
-export const {addTransaction,deleteTransaction,editTransaction,total,clearTransaction,manageRecursiveTransactions}=transactions.actions;
+export const {addTransaction,deleteTransaction,editTransaction,clearTransaction,manageRecursiveTransactions}=transactions.actions;
 export default transactions.reducer;
 
