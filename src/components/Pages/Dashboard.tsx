@@ -9,6 +9,7 @@ import { useAppDispatch, useAppSelector } from "../hooks";
 import { manageRecursiveTransactions } from "../slice/transactionSlice";
 import { useEffect } from "react";
 import TopCategoryTable from "./CategoryTable";
+
 function Dashboard() {
   const dispatch = useAppDispatch();
 
@@ -16,11 +17,12 @@ function Dashboard() {
   useEffect(() => {
     dispatch(manageRecursiveTransactions());
   }, [dispatch]);
+ 
 
-  //Get the user from session Storage to display username
-  const user = sessionStorage.getItem("session_user")
+  //Get the user data from redux store
+  const user=useAppSelector(state=>state.auth.users)
 
-  //Calculate transactions and recursive transactions
+  //Get the transactions and recursive transactions from Redux Store
   const transactions = useAppSelector(
     (state) => state.transaction.list
   );
@@ -29,11 +31,12 @@ function Dashboard() {
     (state) => state.transaction.recursiveList
   );
 
+  //Filter the non recurring transactions
   const nonRecurring = transactions.filter((t) => !t.recurring);
 
-  //Complete array of recursive and non recursive transactions
+  //Complete array of recursive and non recursive transactions 
   const completeArray = [...nonRecurring, ...recursiveList];
-  const now = Date.now();
+  const now = Date.now(); 
 
   //Effective transactions till now.
   const effectiveTransactions = completeArray.filter(
@@ -47,6 +50,7 @@ function Dashboard() {
   const incomeMap: Record<string, number> = {};
   const expenseMap: Record<string, number> = {};
 
+  //Calculating the income and expense till Date..
   for (const t of effectiveTransactions) {
     const amt = Number(t.amount);
 
@@ -61,6 +65,8 @@ function Dashboard() {
     }
   }
 
+  
+  
   //Sort the top3 items based on amount
   const toTop3 = (map: Record<string, number>) =>
     Object.entries(map)
@@ -71,29 +77,13 @@ function Dashboard() {
   const top3Income = toTop3(incomeMap);
   const top3Expense = toTop3(expenseMap);
 
-
-  //not user, navigate to login
-  // useEffect(() => {
-
-  //   if (!user) {  
-  //     navigate("/login", { replace: true });
-  //   }
-
-  // }, [user, navigate]);
-
-
-  if (!user) {
-    return (<h1>User session expires</h1>)
-  }
-
-  const u = user ? JSON.parse(user) : null;
   return (
     <>
       <Typography
         variant="h4"
         sx={{ textAlign: 'center', width: '100%', margin: '15px' }}
       >
-        Welcome {u.username}
+        Welcome {user?.username}
       </Typography>
       <Grid container spacing={2} justifyContent="center" alignContent="center">
         <Card sx={{ bgcolor: "#daebdcff" }}>
@@ -128,8 +118,6 @@ function Dashboard() {
       </Grid>
 
 
-
-     
       <Grid container spacing={3} mt={2}>
         <Grid size={{ xs: 12, md: 6 }}>
           <TopCategoryTable

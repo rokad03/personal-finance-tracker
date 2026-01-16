@@ -56,7 +56,7 @@ function Login() {
     dispatch(loginRequest({ username, password }));
   };
 
-  /* ---------- UI ---------- */
+  
 
   return (
     <Container maxWidth="xs" sx={{ mt: 8 }}>
@@ -67,7 +67,6 @@ function Login() {
 
         <Box component="form" onSubmit={handleSubmit}>
           <Stack spacing={2}>
-            {/* Server/auth error */}
             {error && <Alert severity="error">{error}</Alert>}
 
             <TextField

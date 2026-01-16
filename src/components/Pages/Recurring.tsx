@@ -51,6 +51,7 @@ export default function Recurring() {
         field: "amount",
         headerName: "Amount",
         flex: 1,
+        type:"number"
       },
       {
         field: "interval",
@@ -62,7 +63,7 @@ export default function Recurring() {
     []
   );
 
-  /* ---------- UI ---------- */
+  
 
   return (
     <>

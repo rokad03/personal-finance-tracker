@@ -1,6 +1,9 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import { Initial } from '../../Types/types';
 
+/**
+ * Initial State of users
+ */
 const initialState:Initial = {
     loading:false,
     users:null,

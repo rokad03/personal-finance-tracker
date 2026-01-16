@@ -1,74 +1,126 @@
 import { Provider } from "react-redux";
 import { MemoryRouter } from "react-router-dom";
-import { configureStore } from "@reduxjs/toolkit";
 import { render, screen } from "@testing-library/react";
-import transactionReducer, { addTransaction, editTransaction } from "../components/slice/transactionSlice";
-import loginReducer from '../components/slice/loginSlice'
-
-import Login from "../components/Login";
-import Dashboard from "../components/Pages/Dashboard";
+import {store} from '../components/store/store'
 import App from "../App";
 
+
 jest.mock("uuid", () => ({
-  v4: () => "static-id-123"
+  v4: jest.fn(() => "mock-uuid-123"),
 }));
 
-const renderWithProviders = (ui: React.ReactNode, preloadedState = {}) => {
-  const store = configureStore({
-    reducer: { transaction: transactionReducer, auth:loginReducer},
-    preloadedState
-  });
-
-  const dispatchSpy = jest.spyOn(store, "dispatch");
+test("restores session on app load", async () => {
+  sessionStorage.setItem(
+    "session_user",
+    JSON.stringify({
+      accessToken: "token",
+      refreshToken: "refresh",
+      expiresAt: Date.now() + 10000,
+    })
+  );
 
   render(
     <Provider store={store}>
       <MemoryRouter initialEntries={["/"]}>
-        {ui}
+        <App />
       </MemoryRouter>
     </Provider>
   );
 
-  return { store, dispatchSpy };
-};
-// beforeEach(() => {
-//   sessionStorage.clear();
-//   jest.clearAllMocks();
+  expect(await screen.findByText(/welcome/i)).toBeInTheDocument();
+});
 
-//   global.fetch = jest.fn();
-// });
-
-
-
-test("Test the successful login", async () => {
+test("refreshes access token when expired", async () => {
   sessionStorage.setItem(
     "session_user",
     JSON.stringify({
-      username: "Nishit",
-    //   accessToken: "valid-token",
-    //   refreshToken: "refresh-token",
-      expiresAt: Date.now() + 5000,
+      accessToken: "old-token",
+      refreshToken: "valid-refresh",
+      expiresAt: Date.now() - 1000, 
     })
   );
 
-  renderWithProviders(<App />, {
-  auth: {
-    user: {
-      username: "emilys",
-      accessToken: "valid-token",
-      refreshToken: "refresh-token",
-      expiresAt: Date.now() + 50000,
-    },
-    loading: false,
-    error: null,
-    restoring:false
-  },
-  transaction: {
-    list: [],
-    recursiveList: [],
-    totalItems: {},
-  },
+  global.fetch = jest.fn().mockResolvedValueOnce({
+    ok: true,
+    json: async () => ({
+      accessToken: "new-access-token",
+      refreshToken: "new-refresh-token",
+    }),
+  } as Response);
+
+  render(
+    <Provider store={store}>
+      <MemoryRouter initialEntries={["/"]}>
+        <App />
+      </MemoryRouter>
+    </Provider>
+  );
+
+ 
+  expect(await screen.findByText(/welcome/i)).toBeInTheDocument();
+
+  const updatedSession = JSON.parse(
+    sessionStorage.getItem("session_user")!
+  );
+
+  expect(updatedSession.accessToken).toBe("new-access-token");
+  expect(updatedSession.refreshToken).toBe("new-refresh-token");
 });
 
-  expect(await screen.findByText(/welcome emilys/i)).toBeInTheDocument();
+test("logs out when refresh token missing", async () => {
+  sessionStorage.setItem(
+    "session_user",
+    JSON.stringify({
+      accessToken: "expired-token",
+      expiresAt: Date.now() - 1000, 
+     
+    })
+  );
+
+  render(
+    <Provider store={store}>
+      <MemoryRouter>
+        <App />
+      </MemoryRouter>
+    </Provider>
+  );
+
+  expect(
+    await screen.findByText(/Session expired — login again/i)
+  ).toBeInTheDocument();
+
+  expect(sessionStorage.getItem("session_user")).toBeNull();
+});
+
+test("logs out when refresh API fails", async () => {
+
+  sessionStorage.setItem(
+    "session_user",
+    JSON.stringify({
+      accessToken: "expired-token",
+      refreshToken: "valid-refresh",
+      expiresAt: Date.now() - 1000, 
+    })
+  );
+
+
+  global.fetch = jest.fn().mockResolvedValueOnce({
+    ok: false, 
+  } as Response);
+
+  render(
+    <Provider store={store}>
+      <MemoryRouter>
+        <App />
+      </MemoryRouter>
+    </Provider>
+  );
+
+  
+  expect(
+    await screen.findByText(/session expired/i)
+  ).toBeInTheDocument();
+
+  
+  expect(sessionStorage.getItem("session_user")).toBeNull();
 });

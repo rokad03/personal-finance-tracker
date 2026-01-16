@@ -12,11 +12,11 @@ import {
     Stack,
     TextField,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Transaction, MethodType, Values } from "../../Types/types";
 import { v4 as uuid } from "uuid";
 import { useAppDispatch, useAppSelector } from "../hooks";
-import { addTransaction, editTransaction } from "../slice/transactionSlice";
+import { addTransaction, editTransaction, total } from "../slice/transactionSlice";
 
 type TransactionType = {
     onClose: () => void;
@@ -40,15 +40,13 @@ export default function TransactionForm({ onClose, tx }: TransactionType) {
     const [showError, setShowError] = useState(false);
 
 
+    //Getting Income and Expense from Store
     const Income = useAppSelector(
         (state) => state.transaction.totalItems.Income
     );
     const Expense = useAppSelector(
         (state) => state.transaction.totalItems.Expense
     );
-
-    //Initial Values
-
 
     const initialValues: Values = {
         id,
@@ -61,19 +59,10 @@ export default function TransactionForm({ onClose, tx }: TransactionType) {
         expiryDate: expiryDate === "None" ? "" : expiryDate,
         interval,
     };
-
-    // const initialValues: Values = {
-    //     id: tx?.id ?? "",
-    //     amount: tx?.amount ?? "",
-    //     type: tx?.type ?? ("" as MethodType),
-    //     date: tx?.date ?? "",
-    //     category: tx?.category ?? "",
-    //     recurring: tx?.recurring ?? false,
-    //     count: tx?.count ?? 1,
-    //     expiryDate: tx?.expiryDate === "None" ? "" : tx?.expiryDate ?? "",
-    //     interval: tx?.interval ?? "",
-    // };
-
+    let initalEditedAmount: string
+    if (tx) {
+        initalEditedAmount = initialValues.amount;
+    }
     const [values, setValues] = useState<Values>(initialValues);
 
 
@@ -100,6 +89,7 @@ export default function TransactionForm({ onClose, tx }: TransactionType) {
         values.date.trim() !== "" &&
         values.type.trim() !== "";
 
+    //recurring transactions validation
     const recurringValid = values.recurring
         ? values.expiryDate !== "" &&
         values.interval !== "" &&
@@ -128,15 +118,22 @@ export default function TransactionForm({ onClose, tx }: TransactionType) {
         expiryDate: values.expiryDate === "" ? "None" : values.expiryDate,
         interval: values.interval,
     });
+    useEffect(() => {
+        dispatch(
+            total({ Income, Expense })
+        )
+    }, [Income, Expense, dispatch])
 
     //handling the transaction
     function handleTransaction() {
         if (!isValid) return;
 
-        if (values.type === "Expense" && Income <= Expense + amountNumber) {
+        if (values.type === "Expense" && Income < Expense + (amountNumber - ((tx) ? Number(initalEditedAmount) : 0))) {
+            console.log(Income, Expense, amountNumber);
             setShowError(true);
             return;
         }
+
         setShowError(false);
 
         const payload = Payload();
@@ -183,10 +180,10 @@ export default function TransactionForm({ onClose, tx }: TransactionType) {
                             fullWidth
                             slotProps={{
                                 htmlInput: {
-                                    'data-testid': 'amount', 
+                                    'data-testid': 'amount',
                                     slotProps: {
                                         htmlInput: {
-                                            min: 1, 
+                                            min: 1,
                                         },
                                     },
                                 },
@@ -207,11 +204,11 @@ export default function TransactionForm({ onClose, tx }: TransactionType) {
                             label="MoneyType"
                             fullWidth
                             value={values.type}
-                             slotProps={{
-                                        htmlInput: {
-                                            "data-testid": "Type",
-                                        },
-                                    }}
+                            slotProps={{
+                                htmlInput: {
+                                    "data-testid": "Type",
+                                },
+                            }}
                             onChange={(e) =>
                                 updateValue("type", e.target.value as MethodType)
                             }
@@ -224,10 +221,10 @@ export default function TransactionForm({ onClose, tx }: TransactionType) {
                         <TextField
                             label="Category"
                             slotProps={{
-                                        htmlInput: {
-                                            "data-testid": "Category",
-                                        },
-                                    }}
+                                htmlInput: {
+                                    "data-testid": "Category",
+                                },
+                            }}
                             fullWidth
                             value={values.category}
                             onChange={(e) => updateValue("category", e.target.value)}
@@ -238,10 +235,10 @@ export default function TransactionForm({ onClose, tx }: TransactionType) {
                             type="date"
                             fullWidth
                             slotProps={{
-                                        htmlInput: {
-                                            "data-testid": "date",
-                                        },
-                                    }}
+                                htmlInput: {
+                                    "data-testid": "date",
+                                },
+                            }}
                             value={values.date}
                             onChange={(e) => updateValue("date", e.target.value)}
                             required
@@ -270,10 +267,10 @@ export default function TransactionForm({ onClose, tx }: TransactionType) {
                                     select
                                     label="Interval"
                                     slotProps={{
-                                                htmlInput: {
-                                                    "data-testid": "Recurring-type",
-                                                },
-                                            }}
+                                        htmlInput: {
+                                            "data-testid": "Recurring-type",
+                                        },
+                                    }}
                                     fullWidth
                                     value={values.interval}
                                     onChange={(e) =>
@@ -293,10 +290,10 @@ export default function TransactionForm({ onClose, tx }: TransactionType) {
                                     value={values.expiryDate}
                                     error={isExpiryInvalid}
                                     slotProps={{
-                                                htmlInput: {
-                                                    "data-testid": "expiryDate",
-                                                },
-                                            }}
+                                        htmlInput: {
+                                            "data-testid": "expiryDate",
+                                        },
+                                    }}
                                     helperText={
                                         isExpiryInvalid
                                             ? "Expiry date must be greater than transaction date"

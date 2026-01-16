@@ -17,6 +17,8 @@ export const store = configureStore({
     getDefaultMiddleware({ thunk: false }).concat(sagaMiddleware),
   
 });
+
+/**It executes everytime when any action is dispatched*/
 store.subscribe(() => {
   const state = store.getState();
 

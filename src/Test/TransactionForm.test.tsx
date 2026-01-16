@@ -132,7 +132,11 @@ describe("TransactionForm", () => {
     { transaction: { list: [], totalItems: { Income: 1000, Expense: 0 } } }
   );
 
-  await user.type(screen.getByTestId("amount"), "200");
+  await user.type(screen.getByTestId("amount"), "-1");
+  expect(await screen.findByText(/Amount must be greater than 0/i)).toBeInTheDocument();
+
+  await user.clear(screen.getByTestId("amount"));
+  await user.type(screen.getByTestId("amount"),"200");
   await user.type(screen.getByTestId("Category"), "Food");
 
   await user.click(screen.getByRole("combobox", { name: /type/i }));

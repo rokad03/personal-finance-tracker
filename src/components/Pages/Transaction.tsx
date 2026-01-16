@@ -19,6 +19,7 @@ export default function Transaction() {
     dispatch(manageRecursiveTransactions());
   }, [list, dispatch]);
 
+  
 
   const [display, setDisplay] = useState(false);
 

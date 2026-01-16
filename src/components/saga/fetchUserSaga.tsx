@@ -10,12 +10,14 @@ import {
 } from "../slice/loginSlice";
 import { AuthResponse, UserRes } from "../../Types/types";
 
-
+//Constants 
 const loginAPI = "https://dummyjson.com/auth/login";
 const refreshAPI = "https://dummyjson.com/auth/refresh";
 const ACCESS_TOKEN_LIFETIME = 1000*30*60; // 30 min
 const REFRESH_TOKEN_LIFETIME = 1000*30*60; 
 const SESSION_KEY = "session_user";
+
+
 function saveSession(user: UserRes) {
   sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
 }
@@ -34,8 +36,8 @@ function isAccessTokenValid(user: UserRes) {
 }
 
 
-//API Calling
 
+/**Dynamic API calling function*/
 function* apiPost<T>(url: string, body: unknown): SagaIterator<T> {
   const res: Response = yield call(fetch, url, {
     method: "POST",
@@ -47,8 +49,8 @@ function* apiPost<T>(url: string, body: unknown): SagaIterator<T> {
   return yield call([res, "json"]);
 }
 
-//Login Saga
 
+/**Login Saga handling the login Request from login form */
 function* handleLogin(
   action: ReturnType<typeof loginRequest>
 ): SagaIterator {
@@ -63,7 +65,6 @@ function* handleLogin(
       expiresAt: Date.now() + ACCESS_TOKEN_LIFETIME,
     };
 
-    // console.log("USer",user);
     saveSession(user);
     yield put(loginSuccess(user));
   } catch {
@@ -71,30 +72,30 @@ function* handleLogin(
   }
 }
 
-//Refresh Saga
+
 
 function* refreshAccessToken(user: UserRes): SagaIterator<UserRes> {
-  // console.log(user.refreshToken)
+  
 
   const refresh: AuthResponse = yield call(apiPost, refreshAPI, {
     refreshToken: user.refreshToken,
-    // expiresInMins: 30,
   });
-  console.log(refresh);
-  const updatedUser: UserRes = {
+  // console.log(refresh);
+
+  const updatedUser: UserRes = {  
     ...user,
     accessToken: refresh.accessToken,
     refreshToken: refresh.refreshToken,
     expiresAt: Date.now() + REFRESH_TOKEN_LIFETIME,
   };
 
-  console.log("UpdatedUSer",updatedUser);
+  // console.log("UpdatedUSer",updatedUser);
   saveSession(updatedUser);
   return updatedUser;
 }
 
-//Restore the data
 
+/**Refresh Saga used when restoring the session */
 function* handleRestore(): SagaIterator {
   const user = loadSession();
 
@@ -138,15 +139,13 @@ function* handleRestore(): SagaIterator {
 
   yield put(restoreFinished());
 }
-function* handleLogout(): SagaIterator {
+function handleLogout() {
   sessionStorage.removeItem("session_user");
   sessionStorage.removeItem("transaction");
 }
 
 
-
-/* ---------- ROOT ---------- */
-
+/**Root Saga from where all actions dispatched*/
 export default function* authSaga() {
   yield takeLatest(loginRequest.type, handleLogin);
   yield takeLatest(restoreSession.type, handleRestore);

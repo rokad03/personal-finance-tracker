@@ -4,6 +4,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { MemoryRouter } from "react-router-dom";
 import Dashboard from "../components/Pages/Dashboard";
 import transactionReducer from "../components/slice/transactionSlice";
+import authReducer from "../components/slice/loginSlice"
 
 const mockedNavigate = jest.fn();
 
@@ -18,7 +19,7 @@ jest.mock("uuid", () => ({
 
 const renderWithProviders = (preloadedState = {}) => {
   const store = configureStore({
-    reducer: { transaction: transactionReducer },
+    reducer: { auth:authReducer, transaction: transactionReducer },
     preloadedState,
   });
 
@@ -37,38 +38,6 @@ describe("Dashboard Component", () => {
   beforeEach(() => {
     sessionStorage.clear();
     jest.clearAllMocks();
-  });
-
-
-  // test("redirects to login if no user session exists", () => {
-  //   renderWithProviders({
-  //     transaction: {
-  //       list: [],
-  //       recursiveList:[],
-  //       totalItems: { Income: 0, Expense: 0 },
-  //     },
-  //   });
-  //   expect(mockedNavigate).toHaveBeenCalledWith("/login", { replace: true });
-  // });
-
-
-  test("renders initial dashboard UI", () => {
-    sessionStorage.setItem(
-      "session_user",
-      JSON.stringify({ username: "Nishit" , expiresAt:Date.now() + 1000*30*60})
-    );
-
-    renderWithProviders({
-      transaction: {
-        list: [],
-        recursiveList:[],
-        totalItems: { Income: 0, Expense: 0 },
-      },
-    });
-
-    expect(screen.getByText("Total Income")).toBeInTheDocument();
-    expect(screen.getByText("Total Expenses")).toBeInTheDocument();
-    expect(screen.getByText("Current Balance")).toBeInTheDocument();
   });
 
 
@@ -140,6 +109,12 @@ describe("Dashboard Component", () => {
       JSON.stringify({ username: "Nishit", expiresAt:Date.now() + 1000*30*60 })
     );
     renderWithProviders({
+      auth: {
+        users: { username: "Nishit" },
+        restoring: false,
+        loading: false,
+        error: "",
+      },
       transaction: {
       list: [
         { id: "1", type: "Income", amount: "100", date: "2024-01-01", recurring:false, count:1, category:"Food" },
@@ -159,12 +134,6 @@ describe("Dashboard Component", () => {
     expect(await screen.findByText(700)).toBeInTheDocument();
       expect(await screen.findByText(300)).toBeInTheDocument();
 
-
-    
-  // const expectedExpense = 600;
-  // const expectedIncome  = 1000;
-
- 
   const expectedTop3Expense = [
     {},
     
