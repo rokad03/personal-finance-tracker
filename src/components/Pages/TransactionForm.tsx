@@ -48,6 +48,7 @@ export default function TransactionForm({ onClose, tx }: TransactionType) {
         (state) => state.transaction.totalItems.Expense
     );
 
+    console.log(Income,Expense)
     const initialValues: Values = {
         id,
         amount,
@@ -118,11 +119,7 @@ export default function TransactionForm({ onClose, tx }: TransactionType) {
         expiryDate: values.expiryDate === "" ? "None" : values.expiryDate,
         interval: values.interval,
     });
-    useEffect(() => {
-        dispatch(
-            total({ Income, Expense })
-        )
-    }, [Income, Expense, dispatch])
+   
 
     //handling the transaction
     function handleTransaction() {

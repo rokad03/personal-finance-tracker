@@ -42,8 +42,10 @@ export default function PaginationTable() {
       {
         field: "amount",
         headerName: "Amount",
-        flex: 1,
+        flex: 0.8,
         type: "number",
+         align: 'left',
+        headerAlign: 'left',
       },
       {
         field: "recurring",
@@ -54,13 +56,13 @@ export default function PaginationTable() {
       {
         field: "interval",
         headerName: "Interval",
-        flex: 1,
+        flex: 0.8,
         sortable: false,
       },
       {
         field: "actions",
         headerName: "Actions",
-        flex: 1,
+        flex: 1.5,
         sortable: false,
         renderCell: (params) => {
           const tx = params.row as Transaction;

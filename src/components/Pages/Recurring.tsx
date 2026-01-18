@@ -51,7 +51,9 @@ export default function Recurring() {
         field: "amount",
         headerName: "Amount",
         flex: 1,
-        type:"number"
+        type:"number",
+        align: 'left',
+        headerAlign: 'left',
       },
       {
         field: "interval",

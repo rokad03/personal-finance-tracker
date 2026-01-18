@@ -6,21 +6,24 @@ import {
 } from "@mui/material";
 
 import { useAppDispatch, useAppSelector } from "../hooks";
-import { manageRecursiveTransactions } from "../slice/transactionSlice";
-import { useEffect } from "react";
+import { manageRecursiveTransactions, total } from "../slice/transactionSlice";
+import { useEffect, useMemo } from "react";
 import TopCategoryTable from "./CategoryTable";
+import ReactECharts from "echarts-for-react";
 
 function Dashboard() {
   const dispatch = useAppDispatch();
+
+
 
   //Calculate the recursive Transactions for dashboard
   useEffect(() => {
     dispatch(manageRecursiveTransactions());
   }, [dispatch]);
- 
+
 
   //Get the user data from redux store
-  const user=useAppSelector(state=>state.auth.users)
+  const user = useAppSelector(state => state.auth.users)
 
   //Get the transactions and recursive transactions from Redux Store
   const transactions = useAppSelector(
@@ -36,7 +39,7 @@ function Dashboard() {
 
   //Complete array of recursive and non recursive transactions 
   const completeArray = [...nonRecurring, ...recursiveList];
-  const now = Date.now(); 
+  const now = Date.now();
 
   //Effective transactions till now.
   const effectiveTransactions = completeArray.filter(
@@ -65,8 +68,12 @@ function Dashboard() {
     }
   }
 
-  
-  
+
+  useEffect(() => {
+    dispatch(
+      total({ Income, Expense })
+    )
+  }, [Income, Expense, dispatch])
   //Sort the top3 items based on amount
   const toTop3 = (map: Record<string, number>) =>
     Object.entries(map)
@@ -76,6 +83,29 @@ function Dashboard() {
 
   const top3Income = toTop3(incomeMap);
   const top3Expense = toTop3(expenseMap);
+
+
+
+  //Echarts Logic
+
+  const chartOption = useMemo(() => {
+    const categories = Array.from(new Set([...Object.keys(incomeMap), ...Object.keys(expenseMap)]));
+    const incomeData = categories.map((cat) => incomeMap[cat] || 0);
+    const expenseData = categories.map((cat) => expenseMap[cat] || 0);
+
+    return {
+      tooltip: { trigger: "axis", axisPointer: { type: "shadow" } },
+      legend: { top: 0 },
+      xAxis: { type: "category", data: categories },
+      yAxis: { type: "value", axisLabel: { formatter: "₹{value}" } },
+      series: [
+        { name: "Income", type: "bar", data: incomeData, itemStyle: { color: "#4caf50" } },
+        { name: "Expense", type: "bar", data: expenseData, itemStyle: { color: "#f44336" } },
+      ],
+    };
+  }, [incomeMap, expenseMap]);
+
+
 
   return (
     <>
@@ -135,6 +165,24 @@ function Dashboard() {
           />
         </Grid>
       </Grid>
+
+      <Grid container justifyContent="center" mt={4}>
+        <Grid size={{ xs: 12, md: 10 }}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                Category-wise Income vs Expense
+              </Typography>
+
+              <ReactECharts
+                option={chartOption}
+                style={{ height: 400, width: "100%" }}
+              />
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
 
     </>
 
