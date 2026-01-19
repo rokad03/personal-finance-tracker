@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from "react";
 import { Paper, Typography } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { useAppDispatch, useAppSelector } from "../hooks";
+import { useAppDispatch, useAppSelector } from "../store/store";
 import { manageRecursiveTransactions } from "../slice/transactionSlice";
 
 const paginationModel = { page: 0, pageSize: 5 };

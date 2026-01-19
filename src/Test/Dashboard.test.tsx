@@ -13,9 +13,6 @@ jest.mock("react-router-dom", () => ({
   useNavigate: () => mockedNavigate,
 }));
 
-jest.mock("uuid", () => ({
-  v4: jest.fn(() => "mock-uuid-123"),
-}));
 
 const renderWithProviders = (preloadedState = {}) => {
   const store = configureStore({
@@ -44,7 +41,7 @@ describe("Dashboard Component", () => {
   test("renders transaction data correctly", () => {
     sessionStorage.setItem(
       "session_user",
-      JSON.stringify({ username: "Nishit", expiresAt:Date.now() + 1000*30*60 })
+      JSON.stringify({ username: "Nishit", expiresAt:Date.now() + 1000*30*60, accessToken: "token" })
     );
 
     renderWithProviders({
@@ -58,12 +55,7 @@ describe("Dashboard Component", () => {
           recurring: false,
         }],
         recursiveList:[],
-        totalItems: {
-          Income: 0,
-          Expense: 200,
-          top3Expense: [{ category: "Sports", amount: 200 }],
-          top3Income: [],
-        },
+        
       },
     });
 
@@ -76,7 +68,7 @@ describe("Dashboard Component", () => {
   test("top expense category is displayed", () => {
     sessionStorage.setItem(
       "session_user",
-      JSON.stringify({ username: "Nishit", expiresAt:Date.now() + 1000*30*60 })
+      JSON.stringify({ username: "Nishit", expiresAt:Date.now() + 1000*30*60,accessToken:"token" })
     );
 
     renderWithProviders({
@@ -90,23 +82,17 @@ describe("Dashboard Component", () => {
           recurring: false,
           count:1
         }],
-        recursiveList:[],
-        totalItems: {
-          Income: 200,
-          Expense: 0,
-          top3Expense: [{ category: "Sports", amount: 200 }],
-          top3Income: [],
-        },
+        recursiveList:[]
       },
     });
 
-    expect(screen.getByText("200")).toBeInTheDocument();
+    expect(screen.getAllByText("200")).toHaveLength(3);
   });
 
   test("Top3 sorting items",async()=>{
      sessionStorage.setItem(
       "session_user",
-      JSON.stringify({ username: "Nishit", expiresAt:Date.now() + 1000*30*60 })
+      JSON.stringify({ username: "Nishit", expiresAt:Date.now() + 1000*30*60,accessToken:"token",refreshToken: "refresh",})
     );
     renderWithProviders({
       auth: {
@@ -130,9 +116,9 @@ describe("Dashboard Component", () => {
     }
     })
   
-  expect(await screen.findByText(600)).toBeInTheDocument();
-    expect(await screen.findByText(700)).toBeInTheDocument();
-      expect(await screen.findByText(300)).toBeInTheDocument();
+  expect(await screen.findByText("600")).toBeInTheDocument();
+    expect(await screen.findByText("700")).toBeInTheDocument();
+      expect(await screen.findByText("300")).toBeInTheDocument();
 
   const expectedTop3Expense = [
     {},

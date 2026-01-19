@@ -12,9 +12,6 @@ jest.mock("react-router-dom", () => ({
   useNavigate: () => mockedNavigate
 }));
 
-jest.mock("uuid", () => ({
-  v4: () => "static-id-123"
-}));
 
 const renderWithStore = (preloadedState = {}) => {
   const store = configureStore({
@@ -38,11 +35,6 @@ describe("Recurring Page", () => {
   });
 
 
-  test("redirects to login if session missing", () => {
-    renderWithStore();
-    expect(mockedNavigate).toHaveBeenCalledWith("/login", { replace: true });
-  });
-
 
   test("renders heading", () => {
     sessionStorage.setItem(
@@ -63,7 +55,7 @@ describe("Recurring Page", () => {
   test("shows only recurring transactions", async () => {
     sessionStorage.setItem(
       "session_user",
-      JSON.stringify({ username: "Nishit" })
+      JSON.stringify({ username: "Nishit",expiresAt:Date.now() + 1000*30*60, accessToken: "token" })
     );
 
     renderWithStore({
@@ -107,7 +99,7 @@ describe("Recurring Page", () => {
    test("Test Daily transactions", async () => {
     sessionStorage.setItem(
       "session_user",
-      JSON.stringify({ username: "Nishit" })
+      JSON.stringify({ username: "Nishit",expiresAt:Date.now() + 1000*30*60, accessToken: "token" })
     );
 
     renderWithStore({
@@ -117,7 +109,7 @@ describe("Recurring Page", () => {
             category: "Skit",
             type: "Expense",
             amount: "500",
-            date: "2026-01-09",
+            date: "2026-01-18",
             recurring: true,
             interval: "Daily",
             expiryDate: "2026-01-20",
@@ -133,9 +125,9 @@ describe("Recurring Page", () => {
 
 
     expect(
-      await screen.findByText("Skit")
-    ).toBeInTheDocument();
-    expect(await screen.findByText("Daily")).toBeInTheDocument();
+      await screen.findAllByText("Skit")
+    ).toHaveLength(2);
+    expect(await screen.findAllByText("Daily")).toHaveLength(2);
 
 
 

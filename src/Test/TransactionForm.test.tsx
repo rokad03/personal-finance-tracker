@@ -7,10 +7,6 @@ import transactionReducer, { addTransaction, editTransaction } from "../componen
 import TransactionForm from "../components/Pages/TransactionForm";
 import { MethodType } from "../Types/types";
 
-jest.mock("uuid", () => ({
-  v4: () => "static-id-123"
-}));
-
 const renderWithProviders = (ui: React.ReactNode, preloadedState = {}) => {
   const store = configureStore({
     reducer: { transaction: transactionReducer },
@@ -58,8 +54,8 @@ describe("TransactionForm", () => {
 
     const amount = await screen.findByTestId("amount");
     expect(amount).toBeInTheDocument();
-      const category = await  screen.findByTestId("Category");
-      const date = await screen.findByTestId("date");
+    const category = await  screen.findByTestId("Category");
+    const date = await screen.findByTestId("date");
 
   await user.type(amount, "100");
   await user.type(category, "Food");
@@ -77,24 +73,18 @@ describe("TransactionForm", () => {
   await user.click(checkbox);
   expect(checkbox).toBeChecked();
 
-  
-  
   await user.click(screen.getByLabelText(/Interval/i));
   await user.click(screen.getByRole("option",{name:/Daily/i}))
   expect(screen.getByTestId('Recurring-type')).toHaveValue('Daily')
 
-  // const selects = screen.getAllByRole("combobox");
-  // await user.click(selects[1]);
-  // await user.click(screen.getByRole("option", { name: /monthly/i }));
+  
   const expiryDate=await screen.findByTestId("expiryDate")
   await user.type(expiryDate, "2026-01-05");
    expect(expiryDate).toHaveValue("2026-01-05")
   expect(await screen.findByText(/Expiry date must be greater than transaction date/i)).toBeInTheDocument();
 
   expect(submit).not.toBeEnabled();
-  // await user.click(submit)
-  
-
+ 
 });
 
 
@@ -103,7 +93,7 @@ describe("TransactionForm", () => {
 
     renderWithProviders(
       <TransactionForm onClose={jest.fn()} />,
-      { transaction: { list: [], totalItems: { Income: 0, Expense: 0 } } }
+      { transaction: { list: [], recursiveList: [] } }
     );
 
     await user.type(screen.getByTestId("amount"), "500");
@@ -129,7 +119,17 @@ describe("TransactionForm", () => {
 
   const { dispatchSpy } = renderWithProviders(
     <TransactionForm onClose={onClose} />,
-    { transaction: { list: [], totalItems: { Income: 1000, Expense: 0 } } }
+    { transaction: { list: [{
+          id: "inc-1",
+          amount: "1000",
+          type: "Income",
+          category: "Salary",
+          date: "2026-01-01",
+          recurring: false,
+          count: 1,
+          expiryDate: "None",
+          interval: ""
+        }], recursiveList: [] } }
   );
 
   await user.type(screen.getByTestId("amount"), "-1");
@@ -171,7 +171,7 @@ describe("TransactionForm", () => {
 
     const { dispatchSpy } = renderWithProviders(
       <TransactionForm onClose={onClose} tx={tx} />,
-      { transaction: { list: [], totalItems: { Income: 0, Expense: 0 } } }
+      { transaction: { list: [tx] , recursiveList: [] } }
     );
 
     await user.clear(screen.getByTestId("amount"));

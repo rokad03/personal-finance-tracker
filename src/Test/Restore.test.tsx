@@ -1,9 +1,7 @@
 import { screen } from "@testing-library/react";
 import App from "../App";
 import { renderWithStore } from "../components/test-utlis";
-jest.mock("uuid", () => ({
-  v4: jest.fn(() => "mock-uuid-123"),
-}));
+
 
 test("restoreSession logs out if refresh fails", async () => {
   const expiredUser = {

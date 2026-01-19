@@ -7,3 +7,15 @@ import { TextEncoder, TextDecoder } from "util";
 
 (global as any).TextEncoder = TextEncoder;
 (global as any).TextDecoder = TextDecoder;
+
+
+jest.mock("uuid", () => ({
+  v4: () => "mock-uuid-123",
+}));
+
+
+jest.mock("echarts-for-react", () => {
+  return function MockECharts() {
+    return <div data-testid="echarts-mock" />;
+  };
+});

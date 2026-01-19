@@ -7,9 +7,6 @@ import PaginationTable from "../components/Pages/PaginationTable";
 let store: any;
 let dispatchSpy: any;
 
-jest.mock("uuid", () => ({
-  v4: jest.fn(() => "mock-uuid-123"),
-}));
 
 const renderWithStore = (preloadedState={}) => {
   store = configureStore({

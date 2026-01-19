@@ -2,9 +2,7 @@ import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import App from "../App";
 import { renderWithStore } from "../components/test-utlis";
-jest.mock("uuid", () => ({
-  v4: jest.fn(() => "mock-uuid-123"),
-}));
+
 const mockedNavigate = jest.fn();
 
 jest.mock("react-router-dom", () => ({
@@ -56,31 +54,6 @@ test("shows error when username or password is empty", async () => {
 
 });
 
-// test.skip("successful login stores session and shows dashboard", async () => {
-
-//   renderWithStore(<App />, { route: "/login" });
-
-//   await userEvent.type(
-//     screen.getByPlaceholderText(/username/i),
-//     "emilys"
-//   );
-//   await userEvent.type(
-//     screen.getByPlaceholderText(/password/i),
-//     "emilyspass"
-//   );
-
-//   await userEvent.click(
-//     screen.getByRole("button", { name: /login/i })
-//   );
-
-
-//   expect(
-//     await screen.findByText(/Welcome emilys/i)
-//   ).toBeInTheDocument();
-
-// });
-
-
 test("invalid login shows error message", async () => {
    sessionStorage.clear();
 
@@ -114,6 +87,7 @@ test("logout clears user and redirects to login", async () => {
     JSON.stringify({
       username: "Nishit",
       expiresAt: Date.now() + 100000,
+      accessToken:"token",refreshToken: "refresh"
     })
   );
    renderWithStore(<App />, {

@@ -12,9 +12,6 @@ jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
   useNavigate: () => mockedNavigate,
 }));
-jest.mock("uuid", () => ({
-  v4: jest.fn(() => "mock-uuid-123"),
-}));
 
 const renderWithProviders = (preloadedState = {}) => {
   const store = configureStore({
@@ -40,10 +37,7 @@ describe("Dashboard Component", () => {
   });
 
 
-  test.skip("redirects to login if no user session exists", () => {
-    renderWithProviders();
-    expect(mockedNavigate).toHaveBeenCalledWith("/login", { replace: true });
-  });
+ 
 
   test("Get the button and Transactionform",async()=>{
     const user=userEvent.setup();

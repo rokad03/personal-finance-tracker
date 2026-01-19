@@ -1,10 +1,10 @@
 
 import { configureStore } from '@reduxjs/toolkit';
-
 import createSagaMiddleware from 'redux-saga';
 import loginReducer from '../slice/loginSlice';
 import usersRootSaga from '../saga/rootSaga';
 import transactionReducer from '../slice/transactionSlice';
+import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 
 const sagaMiddleware = createSagaMiddleware();
 
@@ -18,7 +18,7 @@ export const store = configureStore({
   
 });
 
-/**It executes everytime when any action is dispatched*/
+/** It executes everytime when any action is dispatched */
 store.subscribe(() => {
   const state = store.getState();
 
@@ -35,3 +35,5 @@ export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 
 
+export const useAppDispatch = () => useDispatch<AppDispatch>();
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;

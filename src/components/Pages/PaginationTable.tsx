@@ -2,7 +2,7 @@ import {useMemo, useState } from "react";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import Paper from "@mui/material/Paper";
 import { Box, Button, Stack } from "@mui/material";
-import { useAppDispatch, useAppSelector } from "../hooks";
+import { useAppDispatch, useAppSelector } from "../store/store";
 import { deleteTransaction} from "../slice/transactionSlice";
 import TransactionForm from "./TransactionForm";
 import { Transaction } from "../../Types/types";
@@ -18,8 +18,7 @@ export default function PaginationTable() {
   const [selectedTrans, setSelectedTrans] =
     useState<Transaction | null>(null);
 
-  /* ---------- COLUMNS ---------- */
-
+  //columns
   const columns: GridColDef[] = useMemo(
     () => [
       {
@@ -91,7 +90,7 @@ export default function PaginationTable() {
     [dispatch]
   );
 
-  /* ---------- UI ---------- */
+  //UI
 
   return (
     <>

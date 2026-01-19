@@ -7,7 +7,7 @@ import {
 
 import TransactionForm from "./TransactionForm";
 import PaginationTable from "./PaginationTable";
-import { useAppDispatch, useAppSelector } from "../hooks";
+import { useAppDispatch, useAppSelector } from "../store/store";
 import { manageRecursiveTransactions,clearTransaction } from "../slice/transactionSlice";
 
 

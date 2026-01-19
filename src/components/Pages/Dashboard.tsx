@@ -5,11 +5,12 @@ import {
   Typography,
 } from "@mui/material";
 
-import { useAppDispatch, useAppSelector } from "../hooks";
-import { manageRecursiveTransactions, total } from "../slice/transactionSlice";
+import { useAppDispatch, useAppSelector } from "../store/store";
+import { manageRecursiveTransactions} from "../slice/transactionSlice";
 import { useEffect, useMemo } from "react";
 import TopCategoryTable from "./CategoryTable";
 import ReactECharts from "echarts-for-react";
+import { selectCategoryMaps, selectTotals } from "../../transactionSelector";
 
 function Dashboard() {
   const dispatch = useAppDispatch();
@@ -22,58 +23,15 @@ function Dashboard() {
   }, [dispatch]);
 
 
-  //Get the user data from redux store
-  const user = useAppSelector(state => state.auth.users)
-
-  //Get the transactions and recursive transactions from Redux Store
-  const transactions = useAppSelector(
-    (state) => state.transaction.list
-  );
-
-  const recursiveList = useAppSelector(
-    (state) => state.transaction.recursiveList
-  );
-
-  //Filter the non recurring transactions
-  const nonRecurring = transactions.filter((t) => !t.recurring);
-
-  //Complete array of recursive and non recursive transactions 
-  const completeArray = [...nonRecurring, ...recursiveList];
-  const now = Date.now();
-
-  //Effective transactions till now.
-  const effectiveTransactions = completeArray.filter(
-    (t) => t.date && new Date(t.date).getTime() <= now
-  );
-
-  let Income = 0;
-  let Expense = 0;
-
-  //Create the object for the top3 Income and expense category wise
-  const incomeMap: Record<string, number> = {};
-  const expenseMap: Record<string, number> = {};
-
-  //Calculating the income and expense till Date..
-  for (const t of effectiveTransactions) {
-    const amt = Number(t.amount);
-
-    if (t.type === "Income") {
-      Income += amt;
-      incomeMap[t.category] =
-        (incomeMap[t.category] || 0) + amt;
-    } else {
-      Expense += amt;
-      expenseMap[t.category] =
-        (expenseMap[t.category] || 0) + amt;
-    }
-  }
 
 
-  useEffect(() => {
-    dispatch(
-      total({ Income, Expense })
-    )
-  }, [Income, Expense, dispatch])
+
+const user = useAppSelector(state => state.auth.users);
+
+const { Income, Expense } = useAppSelector(selectTotals);
+const { incomeMap, expenseMap } = useAppSelector(selectCategoryMaps);
+
+
   //Sort the top3 items based on amount
   const toTop3 = (map: Record<string, number>) =>
     Object.entries(map)
@@ -83,8 +41,6 @@ function Dashboard() {
 
   const top3Income = toTop3(incomeMap);
   const top3Expense = toTop3(expenseMap);
-
-
 
   //Echarts Logic
 
@@ -96,16 +52,14 @@ function Dashboard() {
     return {
       tooltip: { trigger: "axis", axisPointer: { type: "shadow" } },
       legend: { top: 0 },
-      xAxis: { type: "category", data: categories },
-      yAxis: { type: "value", axisLabel: { formatter: "₹{value}" } },
+      xAxis: { type: "category", data: categories, name: "Categories",nameLocation: "middle"   },
+      yAxis: { type: "value", axisLabel: { formatter: "₹{value}" } ,  name: "Amount" ,nameLocation: "middle"},
       series: [
         { name: "Income", type: "bar", data: incomeData, itemStyle: { color: "#4caf50" } },
         { name: "Expense", type: "bar", data: expenseData, itemStyle: { color: "#f44336" } },
       ],
     };
   }, [incomeMap, expenseMap]);
-
-
 
   return (
     <>
@@ -182,8 +136,6 @@ function Dashboard() {
           </Card>
         </Grid>
       </Grid>
-
-
     </>
 
   )

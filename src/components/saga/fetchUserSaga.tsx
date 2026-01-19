@@ -9,6 +9,7 @@ import {
   logout,
 } from "../slice/loginSlice";
 import { AuthResponse, UserRes } from "../../Types/types";
+import { clearTransaction } from "../slice/transactionSlice";
 
 //Constants 
 const loginAPI = "https://dummyjson.com/auth/login";
@@ -123,6 +124,7 @@ function* handleRestore(): SagaIterator {
   //  access token expired BUT refreshToken missing
   if (!user.refreshToken) {
     clearSession();
+    yield put(logout());
     yield put(loginError("Session expired — login again"));
     yield put(restoreFinished());
     return;
@@ -139,9 +141,10 @@ function* handleRestore(): SagaIterator {
 
   yield put(restoreFinished());
 }
-function handleLogout() {
+function* handleLogout() {
   sessionStorage.removeItem("session_user");
   sessionStorage.removeItem("transaction");
+  yield put(clearTransaction());
 }
 
 

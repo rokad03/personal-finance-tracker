@@ -12,11 +12,12 @@ import {
     Stack,
     TextField,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Transaction, MethodType, Values } from "../../Types/types";
 import { v4 as uuid } from "uuid";
-import { useAppDispatch, useAppSelector } from "../hooks";
-import { addTransaction, editTransaction, total } from "../slice/transactionSlice";
+import { useAppDispatch, useAppSelector } from "../store/store";
+import { addTransaction, editTransaction } from "../slice/transactionSlice";
+import { selectTotals } from "../../transactionSelector";
 
 type TransactionType = {
     onClose: () => void;
@@ -39,16 +40,8 @@ export default function TransactionForm({ onClose, tx }: TransactionType) {
     const dispatch = useAppDispatch();
     const [showError, setShowError] = useState(false);
 
+    const { Income, Expense } = useAppSelector(selectTotals);
 
-    //Getting Income and Expense from Store
-    const Income = useAppSelector(
-        (state) => state.transaction.totalItems.Income
-    );
-    const Expense = useAppSelector(
-        (state) => state.transaction.totalItems.Expense
-    );
-
-    console.log(Income,Expense)
     const initialValues: Values = {
         id,
         amount,
@@ -60,25 +53,31 @@ export default function TransactionForm({ onClose, tx }: TransactionType) {
         expiryDate: expiryDate === "None" ? "" : expiryDate,
         interval,
     };
-    let initalEditedAmount: string
-    if (tx) {
-        initalEditedAmount = initialValues.amount;
-    }
+    const initalEditedAmount: string = tx ? initialValues.amount : "";
     const [values, setValues] = useState<Values>(initialValues);
-
-
-    const amountNumber = Number(values.amount);
+     const {
+    id: valueId,
+    amount: valueAmount,
+    type: valueType,
+    date: valueDate,
+    category: valueCategory,
+    recurring: valueRecurring,
+    count: valueCount,
+    expiryDate: valueExpiryDate,
+    interval: valueInterval,
+  } = values;
+    const amountNumber = Number(valueAmount);
 
     //checking amount is greater then 0 and non negative
     const isAmountInvalid =
-        values.amount !== "" && amountNumber <= 0;
+        valueAmount !== "" && amountNumber <= 0;
 
     //checking the expiry date is valid  
     const isExpiryInvalid =
-        values.recurring &&
-        values.expiryDate !== "" &&
-        values.date !== "" &&
-        (values.expiryDate ?? "") <= values.date;
+        valueRecurring &&
+        valueExpiryDate !== "" &&
+        valueDate !== "" &&
+        (valueExpiryDate ?? "") <= values.date;
 
     //Verify the data is edited or not
     const isEdited = !tx ? true : JSON.stringify(initialValues) !== JSON.stringify(values);
@@ -86,14 +85,14 @@ export default function TransactionForm({ onClose, tx }: TransactionType) {
     //Basic validation before adding transaction
     const basicValid =
         amountNumber > 0 &&
-        values.category.trim() !== "" &&
-        values.date.trim() !== "" &&
-        values.type.trim() !== "";
+        valueCategory.trim() !== "" &&
+        valueDate.trim() !== "" &&
+        valueType.trim() !== "";
 
     //recurring transactions validation
-    const recurringValid = values.recurring
-        ? values.expiryDate !== "" &&
-        values.interval !== "" &&
+    const recurringValid = valueRecurring
+        ? valueExpiryDate !== "" &&
+        valueInterval !== "" &&
         !isExpiryInvalid
         : true;
 
@@ -109,15 +108,15 @@ export default function TransactionForm({ onClose, tx }: TransactionType) {
     };
 
     const Payload = (): Transaction => ({
-        id: values.id || uuid(),
-        amount: values.amount,
-        type: values.type,
-        date: values.date,
-        recurring: values.recurring,
-        count: values.count,
-        category: values.category,
-        expiryDate: values.expiryDate === "" ? "None" : values.expiryDate,
-        interval: values.interval,
+        id: valueId || uuid(),
+        amount: valueAmount,
+        type: valueType,
+        date: valueDate,
+        recurring: valueRecurring,
+        count: valueCount,
+        category: valueCategory,
+        expiryDate: valueExpiryDate === "" ? "None" : valueExpiryDate,
+        interval: valueInterval,
     });
    
 
@@ -126,7 +125,6 @@ export default function TransactionForm({ onClose, tx }: TransactionType) {
         if (!isValid) return;
 
         if (values.type === "Expense" && Income < Expense + (amountNumber - ((tx) ? Number(initalEditedAmount) : 0))) {
-            console.log(Income, Expense, amountNumber);
             setShowError(true);
             return;
         }
@@ -271,7 +269,7 @@ export default function TransactionForm({ onClose, tx }: TransactionType) {
                                     fullWidth
                                     value={values.interval}
                                     onChange={(e) =>
-                                        updateValue("interval", e.target.value as MethodType)
+                                        updateValue("interval", e.target.value)
                                     }
                                     required
                                 >

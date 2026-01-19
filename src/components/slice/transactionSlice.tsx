@@ -5,7 +5,7 @@ import { v4 as uuid } from "uuid";
 interface TxState {
   list: Transaction[];
   recursiveList: Transaction[]
-  totalItems: Total;
+  // totalItems: Total;
 }
 /**
  *  Adding the days to current day, based on transaction interval
@@ -16,20 +16,7 @@ const addDays = (d: string, n: number) => {
   return dt.toISOString().slice(0, 10);
 };
 
-/**
- * Calculating total Income and expense
- */
-function calculateTotals(list: Transaction[]) {
-  return list.reduce(
-    (acc, t) => {
-      const amt = Number(t.amount);
-      if (t.type === "Income") acc.Income += amt;
-      if (t.type === "Expense") acc.Expense += amt;
-      return acc;
-    },
-    { Income: 0, Expense: 0 }
-  );
-}
+
 
 const saved = sessionStorage.getItem("transaction");
 
@@ -39,43 +26,31 @@ const saved = sessionStorage.getItem("transaction");
 const initialState: TxState = {
   list: saved ? JSON.parse(saved) : [],
   recursiveList: [],
-  totalItems: { Income: 0, Expense: 0 },
+  // totalItems: { Income: 0, Expense: 0 },
 };
 
 export const transactions = createSlice({
-  name: "transactons",
+  name: "transactions",
   initialState,
   reducers: {
     addTransaction: (state, action: PayloadAction<Transaction>) => {
       state.list.unshift(action.payload);
-      const { Income, Expense } = calculateTotals(state.list);
-      state.totalItems.Income = Income;
-      state.totalItems.Expense = Expense;
+
       // sessionStorage.setItem("transaction",JSON.stringify(state.list))
     },
     deleteTransaction: (state, action: PayloadAction<string>) => {
       state.list = state.list.filter(t => t.id !== action.payload)
-      const { Income, Expense } = calculateTotals(state.list);
-      state.totalItems.Income = Income;
-      state.totalItems.Expense = Expense;
+     
       //  sessionStorage.setItem("transaction",JSON.stringify(state.list))
     },
     editTransaction: (state, action: PayloadAction<Transaction>) => {
       state.list = state.list.map(t => t.id === action.payload.id ? action.payload : t)
-      const { Income, Expense } = calculateTotals(state.list);
-      state.totalItems.Income = Income;
-      state.totalItems.Expense = Expense;
+     
       //  sessionStorage.setItem("transaction",JSON.stringify(state.list))
     },
-    total: (state, action: PayloadAction<Total>) => {
-      state.totalItems = action.payload
-      //  sessionStorage.setItem("totalSavedAmount",JSON.stringify(state.totalItems))
-    },
+    
     clearTransaction: (state) => {
       state.list = [];
-      const { Income, Expense } = calculateTotals(state.list);
-      state.totalItems.Income = Income;
-      state.totalItems.Expense = Expense;
       //  sessionStorage.removeItem("transaction")   
     },
 
@@ -128,14 +103,10 @@ export const transactions = createSlice({
       };
 
       state.recursiveList = state.list.flatMap(expandTransactions)
-      // sessionStorage.setItem(
-      //   "recursive-transaction",
-      //   JSON.stringify(state.recursiveList)
-      // );
     }
 
   }
 })
-export const { addTransaction, deleteTransaction, editTransaction, clearTransaction, manageRecursiveTransactions, total } = transactions.actions;
+export const { addTransaction, deleteTransaction, editTransaction, clearTransaction, manageRecursiveTransactions } = transactions.actions;
 export default transactions.reducer;
 

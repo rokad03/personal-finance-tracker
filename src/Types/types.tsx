@@ -17,7 +17,7 @@ export interface User {
 }
 export type Initial={
     loading:boolean,
-    users:Users|null,
+    users:UserRes|null,
     error?:string,
     restoring:boolean
 }

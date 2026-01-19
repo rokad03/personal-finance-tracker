@@ -4,11 +4,8 @@ import { Provider } from "react-redux";
 import { MemoryRouter } from "react-router-dom";
 import { store } from "../components/store/store";
 import App from "../App";
-import { loginRequest} from "../components/slice/loginSlice";
 
-jest.mock("uuid", () => ({
-  v4: () => "static-uuid-123"
-}));
+
 jest.setTimeout(300000)
 
 describe("Add transaction and update Dashboard", () => {
@@ -19,23 +16,6 @@ describe("Add transaction and update Dashboard", () => {
       JSON.stringify({ username: "emilys" })
     );
   });
-
-  test("Test the restore functionality",async()=>{
-     sessionStorage.setItem(
-      "session_user",
-      JSON.stringify({ username: "emilys" })
-    );
-    store.dispatch(loginRequest({username:"emilys",password:"emilyspass"})); 
-    render(
-    <Provider store={store}>
-      <MemoryRouter initialEntries={["/transactions"]}>
-        <App/>
-      </MemoryRouter>   
-    </Provider>
-   ) 
-   expect(screen.queryByText("Login")).not.toBeInTheDocument();
-   
-  })
 
   test("Test the empty user data",async()=>{
     sessionStorage.removeItem("session_user");
@@ -79,11 +59,7 @@ describe("Add transaction and update Dashboard", () => {
 
      // eslint-disable-next-line testing-library/no-debugging-utils
     screen.debug();
-    // expect(screen.getByText())
-
-
-
-    // expect(screen.getByText("Total Income")).toBeInTheDocument();
+    
     expect(await screen.findAllByText("Login")).toHaveLength(2);  
     await user.type(screen.getByPlaceholderText("username"), "emilys");
     await user.type(screen.getByPlaceholderText("password"), "emilyspass");

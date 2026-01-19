@@ -19,13 +19,12 @@ export default function App() {
       <Routes>
         <Route path='/login' element={<Login/>}></Route>
         <Route element={<MainLayout />}>
-          <Route path='/' element={<ProtectedRoute><Dashboard/></ProtectedRoute>} />
+        <Route path='/' element={<ProtectedRoute><Dashboard/></ProtectedRoute>} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} /> 
         <Route path="/transactions" element={<ProtectedRoute><Transaction /></ProtectedRoute>} />
         <Route path="/recurring-transactions" element={<ProtectedRoute><Recurring /></ProtectedRoute>} />
         </Route>
       </Routes>
-    
     </>
   );
 }
