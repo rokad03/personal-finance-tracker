@@ -126,8 +126,8 @@ describe("Recurring Page", () => {
 
     expect(
       await screen.findAllByText("Skit")
-    ).toHaveLength(2);
-    expect(await screen.findAllByText("Daily")).toHaveLength(2);
+    ).toHaveLength(3);
+    expect(await screen.findAllByText("Daily")).toHaveLength(3);
 
 
 
